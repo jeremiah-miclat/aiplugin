@@ -15,8 +15,9 @@ replaced, not real content for a real server.
 A real Paper plugin, not a sidecar: hooks `PlayerJoinEvent`/`AsyncChatEvent` directly and gives
 items via the console command dispatcher in-process — no RCON, no log tailing. Full feature
 parity with watcher.js: personality (friendly/trashtalk), KB chunk search, per-player +
-server-wide conversation memory, batched OpenRouter calls with model fallback/rotation, per-IP
-24h item-give limits, equipment quantity caps, crash-safe state persistence.
+server-wide conversation memory, batched AI calls with model fallback/rotation across a
+configurable provider (OpenRouter/OpenAI-compatible/Anthropic — see SETUP.md), per-IP 24h
+item-give limits, equipment quantity caps, crash-safe state persistence.
 
 **Version strategy:** compiled against Paper API **1.21.11** (the last release before Mojang's
 2026 switch to year.drop.hotfix versioning) targeting **Java 21** bytecode — deliberately not the
@@ -34,32 +35,12 @@ Output: `paper/target/ai-companion-paper-<version>.jar` (shaded, Gson bundled/re
 `target/` is Maven build output, wiped/regenerated on every build, so it's not where a jar you
 mean to keep should live. See **Releases** below for that.
 
-**Install:** drop the jar in `plugins/`, start the server once to generate
-`plugins/AiCompanion/`, then edit what's in there — an admin **must** fill in `config.yml`'s
-`ai.apiKey` with a real key (left blank in the shipped default; every AI call logs a warning and
-fails until it's set). Two more things land in that same folder and are re-read live on every
-question (no restart needed):
-
-- `server-info.md` — a short fill-in-the-blanks template (server name, rules, commands, links).
-  Ships as a template with blanks, not real content — replace it with your actual server's info.
-- `kb/` — a folder, not a single file: drop in as many `.md` files as you want for anything
-  server-info.md doesn't have room for (game systems, lore, item lists, event rules, whatever).
-  Ships with one `01-overview.md` showing the heading-chunking format with a toy example; delete
-  the example and write your own. Files are read in filename order, so name them like
-  `01-overview.md`, `02-commands.md` if the order matters to you.
-
-**AI provider:** `config.yml`'s `ai.provider` defaults to `"openrouter"` (one key, access to
-models from virtually every provider through OpenRouter's own API — zero config changes needed
-from the default). Two alternatives, both requiring `ai.models` to be replaced with model ids that
-provider actually understands:
-- `"openai-compatible"` — any endpoint speaking the same OpenAI-style chat/completions format:
-  OpenAI itself, Groq, Together, Fireworks, DeepSeek, Mistral, xAI, a self-hosted Ollama/LM
-  Studio/vLLM server, etc. Also set `ai.baseUrl` (e.g. `"https://api.openai.com/v1"`).
-- `"anthropic"` — Anthropic's Claude API directly, not through OpenRouter.
-
-**Reloading:** `/aicompanion reload` (alias `/aic`, permission `aicompanion.reload`, default op)
-re-reads `config.yml` and re-seeds `kb/`/`server-info.md` if missing, without a server restart —
-pending asks, 24h item-give cooldowns, and conversation history all survive it.
+**Install and configure:** drop the jar in `plugins/`, start the server once to generate
+`plugins/AiCompanion/config.yml` + `server-info.md` + `kb/`, then see **[SETUP.md](SETUP.md)** —
+the single source of truth for configuring this project on any platform (AI provider setup with
+free-tier options, describing your own server, item-giving limits, the reload command, every
+config key). Don't duplicate that content here; if this README and SETUP.md ever disagree,
+SETUP.md is the one that's right.
 
 Not carried over from the original `config.json`: `logPath`/`pollIntervalMs` (no log tailing
 anymore) and the `rcon` block (gives go straight through Bukkit in-process). Don't reuse the old
@@ -132,8 +113,8 @@ rebuild any past version if you check out that version's source and run it again
 
 Deliberately not scaffolded yet per the build order. Note going in: Fabric and Forge/NeoForge are
 mod loaders (client+server), not server-plugin APIs like Paper/Bukkit — there's no shared code
-with `paper/` beyond plain data/logic classes (OpenRouterClient, AskParser, KnowledgeBase,
-RateLimiter, ConversationMemory all ported as-is with zero Bukkit imports, so they can likely be
-reused directly). The event hookup, item-giving, and chat-broadcast layers will need separate
-Fabric and Forge implementations using each loader's own server-join/chat-message events and
+with `paper/` beyond plain data/logic classes (AiClient, AskParser, KnowledgeBase, RateLimiter,
+ConversationMemory all ported as-is with zero Bukkit imports, so they can likely be reused
+directly). The event hookup, item-giving, and chat-broadcast layers will need separate Fabric and
+Forge implementations using each loader's own server-join/chat-message events and
 `ServerPlayerEntity` item-giving APIs.
