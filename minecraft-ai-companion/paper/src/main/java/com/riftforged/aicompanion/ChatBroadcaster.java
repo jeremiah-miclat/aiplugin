@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * Ports sendChat/sendPackedReplies/packLines from watcher.js. Every caller passes a message
- * already shaped as "PlayerName: text", so this only adds the "mcAi » " sender prefix — using
+ * already shaped as "PlayerName: text", so this only adds the "mcAi > " sender prefix — using
  * Adventure Components directly (Paper's Server implements Audience) instead of a tellraw/RCON
  * round trip, since the plugin runs in-process.
  */
@@ -71,7 +71,7 @@ public final class ChatBroadcaster {
 
     private static Component formatted(String safe) {
         return Component.text(BOT_NAME, NamedTextColor.BLUE, TextDecoration.BOLD)
-            .append(Component.text(" » ", NamedTextColor.GRAY))
+            .append(Component.text(" > ", NamedTextColor.GRAY))
             .append(Component.text(safe, NamedTextColor.WHITE));
     }
 }

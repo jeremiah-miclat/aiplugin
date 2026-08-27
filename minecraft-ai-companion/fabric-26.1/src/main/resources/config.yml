@@ -1,0 +1,94 @@
+# AI Companion configuration.
+#
+# server-info.md and the kb/ folder live alongside this file (in config/aicompanion/) — that's
+# where YOU describe YOUR server. Nothing in this mod is pre-loaded with any particular server's
+# content: server-info.md ships as a fill-in-the-blanks template, and kb/ ships with one example
+# file showing the format. Replace/expand both with your own server's actual details. Both are
+# re-read live on every question, no reload needed.
+
+serverName: "My Minecraft Server"
+
+# "friendly" or "trashtalk" — see Persona.java for what each sounds like.
+personality: "friendly"
+
+askPrefix: "!ai"
+
+# Every accepted "!ai" waits for the next window boundary, then the whole window's worth of
+# questions goes out as ONE AI call (batched), so near-simultaneous asks from different players
+# don't each spend a separate call. Keep this comfortably above (60000 / N) where N is your
+# provider's requests-per-minute ceiling for your configured models (relevant for free tiers).
+batchWindowMs: 10000
+
+# Total "!ai" messages accepted per window across all players (one slot per player per window).
+maxAsksPerWindow: 10
+
+# Minimum seconds between one player's ACCEPTED asks — anti-spam, independent of batchWindowMs.
+# Uncomment and raise this if you want to slow down a single persistent asker without changing
+# the server-wide batching cadence for everyone else. Left unset, it defaults to batchWindowMs
+# (i.e. a player is naturally limited to one accepted ask per window either way).
+# askCooldownSeconds: 10
+
+# How many distinct requests one "!ai" message can resolve at once (e.g. a question AND an item
+# ask bundled together).
+maxAskSubparts: 3
+
+itemGiving:
+  # Master switch. If false, the bot will NEVER give out an item — no matter what a player asks
+  # for or what the AI would otherwise decide — and it's told in its own prompt not to offer.
+  # Plain questions/chat are completely unaffected either way.
+  enabled: true
+
+  # How many item-give requests one player can have fulfilled per rolling 24h window. Plain
+  # questions/chitchat are NOT limited by this — only actually receiving an item spends a slot.
+  # Irrelevant while enabled: false.
+  maxPerDay: 10
+
+  # Max quantity for ordinary stackable items (blocks, materials, food, etc).
+  maxQuantity: 64
+
+  # Max quantity for equipment (weapons/armor/tools/etc — anything with a vanilla max stack size of 1).
+  maxEquipmentQuantity: 1
+
+# If true, every bot chat line broadcasts server-wide (like the original's "tellraw @a"). If
+# false, lines only go to the console log.
+broadcastReplies: true
+
+ai:
+  # Which AI backend to talk to:
+  #   "openrouter"        — one key, access to models from virtually every provider (Anthropic,
+  #                         OpenAI, Google, Meta, etc.) through OpenRouter's own API.
+  #   "openai-compatible" (default) — any endpoint that speaks the same OpenAI-style
+  #                         chat/completions format: OpenAI itself, Groq, Together, Fireworks,
+  #                         DeepSeek, Mistral, xAI, a self-hosted Ollama/LM Studio/vLLM server,
+  #                         etc. Set baseUrl below. Ships defaulted to Groq (fast, generous free
+  #                         tier, no credit card needed) — see SETUP.md at the project root for a
+  #                         full walkthrough of every provider option and how to switch between them.
+  #   "anthropic"         — Anthropic's own Claude API directly (not through OpenRouter).
+  provider: "openai-compatible"
+
+  # Admin: put your real API key for whichever provider is selected above here. Leave blank and
+  # every AI call will fail with a warning in the log until this is set — there is no working
+  # shared/default key, every install needs its own (see SETUP.md for why, and for direct links to
+  # each provider's key page). Recommended: use a FREE-TIER account with no credit card attached
+  # for whichever provider you pick, not a paid one — that way there's a hard ceiling (you get
+  # rate-limited/errors) instead of a real bill if something misbehaves (a bug, a spam flood, a
+  # misconfigured limit). Every provider option above has a genuine free tier.
+  apiKey: ""
+
+  # ONLY used when provider is "openai-compatible" — the base URL of the endpoint, up to and NOT
+  # including "/chat/completions". Defaulted to Groq's; see SETUP.md for other providers' URLs
+  # (OpenAI, Together, a local Ollama server, etc).
+  baseUrl: "https://api.groq.com/openai/v1"
+
+  # Model ids to try, in order, round-robining which one starts first across calls, falling
+  # through to the next on failure/rate-limit — same mechanism regardless of provider, just use
+  # whatever ids your provider expects. The defaults below are Groq's current free-tier chat
+  # models; if you switch provider, replace this list with model ids that provider actually
+  # understands (see SETUP.md for examples per provider).
+  models:
+    - "groq/compound"
+    - "groq/compound-mini"
+    - "openai/gpt-oss-120b"
+    - "openai/gpt-oss-20b"
+    - "qwen/qwen3.6-27b"
+    - "qwen/qwen3.8-27b"

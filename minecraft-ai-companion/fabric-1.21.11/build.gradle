@@ -1,0 +1,50 @@
+plugins {
+    id 'fabric-loom' version '1.17.20'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    // ai-companion-common is installed here via `mvn install` in ../common (see README.md).
+    mavenLocal()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // Bundled into the final jar via Loom's built-in jar-in-jar support (the `include(...)`
+    // wrapper below) rather than a shade/shadow plugin - that's the idiomatic Fabric mechanism
+    // for embedding non-mod library dependencies.
+    include(implementation("com.riftforged:ai-companion-common:1.0.0"))
+    // Minecraft itself already bundles Gson on the runtime classpath, so it's a compile-only
+    // dependency here - NOT included, to avoid a duplicate/conflicting copy at runtime.
+    compileOnly "com.google.code.gson:gson:2.11.0"
+    // Not bundled with Minecraft, unlike Gson - has to be included for config.yml parsing.
+    include(implementation("org.yaml:snakeyaml:2.2"))
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+}
+
+processResources {
+    inputs.property "version", project.version
+    filteringCharset "UTF-8"
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}

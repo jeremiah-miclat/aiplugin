@@ -58,19 +58,36 @@ build_module() {
       break
     done
   elif [ -f "$module_dir/build.gradle" ] || [ -f "$module_dir/build.gradle.kts" ]; then
-    echo "!! $name/ uses Gradle — release.sh doesn't build Gradle modules yet (Fabric/Forge"
-    echo "   builds go through Loom, which needs its own invocation + version-extraction logic"
-    echo "   that's only worth writing against a real module, not a guess). Build it manually"
-    echo "   for now and copy the jar into releases/<version>/$platform/${mc_version:+$mc_version/},"
-    echo "   or ask to have Gradle support added here once this module actually exists."
-    return
+    if [ ! -x "$module_dir/gradlew" ]; then
+      echo "!! $name/ has no Gradle wrapper yet (run 'gradle wrapper --gradle-version <ver>' in"
+      echo "   it once it can configure successfully — see the module's own build.gradle/README"
+      echo "   notes if it currently can't; that's usually an external blocker, not this script)."
+      return
+    fi
+    echo "== building $name (Gradle) =="
+    (cd "$module_dir" && ./gradlew --no-daemon build)
+    version="$(grep -E '^mod_version=' "$module_dir/gradle.properties" | cut -d= -f2)"
+    if [ -z "$version" ]; then
+      echo "!! couldn't read mod_version from $module_dir/gradle.properties"
+      exit 1
+    fi
+    # Loom leaves the real remapped jar plus a "-sources.jar" (and sometimes a "-dev.jar"
+    # intermediate) in build/libs/ — only the plain "<name>-<version>.jar" ships.
+    for candidate in "$module_dir"/build/libs/*.jar; do
+      [ -e "$candidate" ] || continue
+      case "$(basename "$candidate")" in
+        *-sources.jar|*-dev.jar) continue ;;
+      esac
+      jar="$candidate"
+      break
+    done
   else
     echo "-- skipping $name/ (no pom.xml or build.gradle found)"
     return
   fi
 
   if [ -z "$jar" ]; then
-    echo "!! no jar found in $module_dir/target after build — something's wrong, check the build output above"
+    echo "!! no jar found in $module_dir after build — something's wrong, check the build output above"
     exit 1
   fi
 

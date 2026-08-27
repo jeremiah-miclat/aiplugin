@@ -1,0 +1,19 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+plugins {
+    // Auto-provisions the Java 25 toolchain if it isn't already installed on the machine running
+    // this build - without this, Gradle would fail outright on a machine that only has (say)
+    // Java 21, instead of downloading the JDK 25 this module's toolchain block requires.
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'ai-companion-fabric-26.1'

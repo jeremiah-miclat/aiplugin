@@ -1,0 +1,10 @@
+# Gradle build output/caches (Fabric/Forge modules) — large (Loom's cache alone can be 50-100MB+,
+# including cached Minecraft jars), fully regeneratable from source, and machine-specific. The
+# actual deliverable jars belong in releases/ (via release.sh), not here.
+**/.gradle/
+**/build/
+
+# Same idea for Maven modules, going forward — note this does NOT retroactively untrack
+# paper/target/, which was already committed before this file existed; it only stops NEW Maven
+# modules from being tracked the same way.
+**/target/

@@ -53,7 +53,11 @@ public final class AskProcessor {
         String prompt = persona.joinIntro(config.serverName()) +
             " A player named " + player + " just joined the server. Write ONE short, casual, " +
             "welcoming message (max 15 words, under 200 characters, plain text, no markdown, " +
-            "no quotes, no emojis — Minecraft's default font can't render them).";
+            "no quotes, no emojis — Minecraft's default font can't render them). " +
+            "Output ONLY that message and nothing else — no reasoning, no explanation of your " +
+            "choices, no \"Reasoning:\" section, no preamble or meta-commentary before or after " +
+            "it. The very first character of your response must be the first character of the " +
+            "greeting itself.";
         return ai.ask(prompt, ChatBroadcaster.MC_CHAT_LIMIT)
             .thenCompose(reply -> {
                 String greeting = (reply == null || reply.isEmpty()) ? messages.joinFallbackGreeting() : reply;

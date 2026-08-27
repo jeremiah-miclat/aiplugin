@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.riftforged</groupId>
+  <artifactId>ai-companion-common</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <!--
+    Platform-neutral logic shared by every platform module: the AI provider client (ai/), KB
+    chunk search (kb/), rate limiting/conversation memory/ask-queue batching (state/), and the
+    persona text (Persona.java). Zero Minecraft/Bukkit/Fabric imports anywhere in here - verified
+    by grep before this module existed - so it's plain reusable Java, installed to the local Maven
+    repository (`mvn install`) and consumed by Gradle-based Fabric modules via mavenLocal().
+
+    Deliberately NOT yet wired into paper/, which still carries its own copies of these same
+    classes - paper/ was already built and released before this module existed, and refactoring a
+    working, shipped platform to depend on this is a separate, lower-risk-when-done-later step,
+    not bundled into standing this module up for Fabric.
+  -->
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>21</maven.compiler.release>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.11.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <!-- Only used by YamlConfig, itself only used by the Fabric modules (Paper has Bukkit's own
+         FileConfiguration for this) - provided here so both Fabric MC-version modules share one
+         copy of the config-loading logic instead of duplicating it. -->
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>2.2</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>${project.artifactId}-${project.version}</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>

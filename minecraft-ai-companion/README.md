@@ -1,14 +1,29 @@
 # AI Companion — multi-platform plan
 
 Port of `ai-bot-openrouter/watcher.js` (a Node.js sidecar that tailed the PaperMC log and used
-RCON) into native server plugins/mods. Build order: **Paper first** (done), then Fabric, then
-Forge/NeoForge.
+RCON) into native server plugins/mods. Build order: **Paper** (done) → **Fabric** (1.21.11 done,
+26.1 blocked — see below) → Forge/NeoForge (not started).
 
 **Server-agnostic by design:** the original `watcher.js` shipped with one specific server's
 lore/rules baked into its KB file. Nothing here is patterned to any particular server — every bit
 of server-specific content (name, rules, commands, lore, item lists, whatever) is admin-supplied
 config, and every default that ships in the jar is a generic, empty-ish template meant to be
 replaced, not real content for a real server.
+
+## common/ — shared logic, used by the Fabric modules
+
+Plain Java, zero Minecraft/Bukkit/Fabric imports (verified by grep, not just by design): the AI
+provider client, KB chunk search, rate limiting, conversation memory, ask-queue batching, YAML
+config loading, and the full `AskProcessor` orchestration (prompt construction, parsing, the
+whole join/ask flow) — abstracted from any specific platform via a small `GameBridge` interface
+(give an item, send a chat line, resolve a rate-limit key) that each Fabric MC-version module
+implements once in its own mapped API. Built with Maven, installed to the local repo (`mvn
+install`) so Gradle-based Fabric modules can depend on it via `mavenLocal()`.
+
+Deliberately **not** wired into `paper/`, which still carries its own copies of these same
+classes — `paper/` was already built and released before this module existed; retrofitting a
+working, shipped platform to depend on it is a separate, lower-risk-when-done-later step, not
+bundled into standing this module up for Fabric.
 
 ## paper/ — done, builds clean
 
@@ -68,12 +83,12 @@ releases/
     paper/
       ai-companion-paper-1.0.0.jar            <- one jar, spans MC versions
     fabric/
-      1.21.1/
+      1.21.11/
         ai-companion-fabric-1.0.0.jar
-      26.1/
+      26.1/                                    <- once fabric-26.1's build is unblocked
         ai-companion-fabric-1.0.0.jar
     forge/
-      1.21.1/
+      1.21.11/
         ...
       26.1/
         ...
@@ -81,7 +96,7 @@ releases/
 
 **Module naming convention `release.sh` reads to build this automatically:**
 - `paper` — no MC-version suffix, one jar, filed straight under `<platform>/`.
-- `fabric-1.21.1`, `fabric-26.1`, `forge-26.1`, etc. — `<platform>-<mc-version>`, each its own
+- `fabric-1.21.11`, `fabric-26.1`, `forge-26.1`, etc. — `<platform>-<mc-version>`, each its own
   complete module (own `pom.xml`/`build.gradle`), filed under `<platform>/<mc-version>/`. Add a
   new module directory per Minecraft version you want to support; the script picks it up with no
   other configuration.
@@ -99,22 +114,70 @@ Modules can be at different versions independently (a Paper-only bugfix release 
 bump Fabric/Forge) — `release.sh` reads each module's own version, so it files into whichever
 version folder is actually its own.
 
-Maven modules (Paper) build automatically today. Fabric/Forge will use Gradle + Loom once they
-exist, which `release.sh` doesn't drive yet on purpose — that logic is only worth writing (and
-testing for real) against an actual module, not guessed in advance; it'll print a reminder to
-build those manually until that support is added.
+Both Maven modules (Paper) and Gradle/Loom modules (Fabric) build automatically — `release.sh`
+detects which build tool a module uses and drives it accordingly. A Gradle module needs its own
+wrapper (`./gradlew`) generated before `release.sh` will touch it (`gradle wrapper
+--gradle-version <ver>` run once inside that module) — if a module can't configure successfully
+yet (see `fabric-26.1/` above), it can't generate a wrapper either, so `release.sh` just skips it
+with a reminder instead of guessing.
 
 `releases/` is build output like `target/`/`build/` — regeneratable from source at any time — so
 if this project ever moves into git, all three belong in `.gitignore` rather than being committed;
 keep specific jars you want to hand out by copying them elsewhere. `release.sh` will happily
 rebuild any past version if you check out that version's source and run it again.
 
-## fabric/ and forge/ — not started
+## fabric-1.21.11/ — done, builds clean
 
-Deliberately not scaffolded yet per the build order. Note going in: Fabric and Forge/NeoForge are
-mod loaders (client+server), not server-plugin APIs like Paper/Bukkit — there's no shared code
-with `paper/` beyond plain data/logic classes (AiClient, AskParser, KnowledgeBase, RateLimiter,
-ConversationMemory all ported as-is with zero Bukkit imports, so they can likely be reused
-directly). The event hookup, item-giving, and chat-broadcast layers will need separate Fabric and
-Forge implementations using each loader's own server-join/chat-message events and
-`ServerPlayerEntity` item-giving APIs.
+A real Fabric mod: `ServerPlayerEvents.JOIN`/`ServerMessageEvents.ALLOW_CHAT_MESSAGE` for
+join/chat (the latter *cancels* a message that will never be answered — duplicate/cooldown/full —
+instead of letting spam show in public chat, same anti-spam behavior as Paper), items given by
+constructing an `ItemStack` from the vanilla registry directly (no command-dispatch trick needed —
+Fabric doesn't have Bukkit's ecosystem of plugins overriding vanilla commands), `/aicompanion
+reload` via Brigadier. Config is `config/aicompanion/config.yml` (same YAML shape/keys as Paper's
+`config.yml` — copy one to the other) parsed with a bundled snakeyaml, since Fabric has no
+Bukkit-style built-in config API.
+
+Built with **Yarn mappings** (`1.21.11+build.6`) + **Java 21**, via Fabric Loom. Has its own Gradle
+wrapper (`./gradlew build` from inside `fabric-1.21.11/`) so it doesn't depend on any
+pre-installed Gradle. `release.sh` builds it like any other module.
+
+One real API surprise worth knowing if you touch this code: **1.21.11 replaced Minecraft's old
+integer op-levels (0–4) with a named `PermissionLevel` enum** (`ALL`/`MODERATORS`/`GAMEMASTERS`/
+`ADMINS`/`OWNERS`) — `CommandManager.requirePermissionLevel(CommandManager.ADMINS_CHECK)` is the
+modern equivalent of the old `.requires(source -> source.hasPermissionLevel(4))`.
+
+## fabric-26.1/ — source complete, build currently blocked upstream
+
+The Java source is fully written and extensively cross-checked (via `javap` against real,
+correctly-mapped Minecraft classes) — but it can't actually compile right now because **Mojang is
+not currently publishing official mapping data for the 26.x version line** (confirmed directly
+against `piston-meta.mojang.com`'s live version manifest: every 26.1.x patch and 26.2 have a
+`downloads` block with only `client`/`server`, no `client_mappings`/`server_mappings` — unlike
+1.21.11, which has both). Fabric's own Yarn mappings are built *from* Mojang's official mappings,
+which is also why no Yarn build exists for this line either (see `fabric-26.1/gradle.properties`).
+
+This looks like it may be temporary, not a permanent policy change: a separate project on this
+machine has a genuinely successful build from **August 23rd** with correctly-mapped classes
+cached, and Mojang's own manifest for 26.1.2 shows a `time` of **August 25th** — meaning mappings
+were very likely available up to right around when Mojang last regenerated that version's
+manifest, and the regen is probably what dropped them. Worth periodically retrying rather than
+treating this as permanently stuck:
+
+```
+cd fabric-26.1
+JAVA_HOME=<path to a Java 25 JDK> gradle --no-daemon build
+```
+
+(needs a system/portable Gradle since this module has no wrapper yet — generating one requires
+the project to configure successfully first, which is exactly what's currently blocked). Once it
+builds, run `gradle wrapper --gradle-version 9.7.1` inside it so `release.sh` picks it up
+automatically like `fabric-1.21.11`.
+
+Different mapping set, real naming differences worth knowing about if you pick this back up:
+Mojang mappings use `ServerPlayer`/`MinecraftServer` (not Yarn's `ServerPlayerEntity`),
+`net.minecraft.resources.Identifier` (not `ResourceLocation` — genuinely renamed in this version),
+`BuiltInRegistries`/`Registry.getOptional(...)`, `Component`/`ChatFormatting`, and the same
+op-level-to-`PermissionLevel` change as 1.21.11 but with different names:
+`Commands.hasPermission(Commands.LEVEL_ADMINS)`.
+
+## forge/ — not started

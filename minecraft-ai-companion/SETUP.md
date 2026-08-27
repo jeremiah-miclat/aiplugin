@@ -1,16 +1,21 @@
 # Setup Guide
 
-This is the single source of truth for configuring the AI Companion, on any platform (today:
-Paper; Fabric/Forge later will reuse the same `ai:`/`itemGiving:` config shape). If something here
-ever disagrees with a comment in a shipped `config.yml`, this file is the one to trust — config.yml
-comments summarize, this explains.
+This is the single source of truth for configuring the AI Companion, on any platform (Paper,
+Fabric — see the project [README](README.md) for which Minecraft versions each currently
+supports and where to get/build the jar). Every platform uses the same `config.yml` shape/keys —
+copy one platform's config to another and it'll just work. If something here ever disagrees with
+a comment in a shipped `config.yml`, this file is the one to trust — config.yml comments
+summarize, this explains.
 
 ## 1. Install
 
-Drop the platform jar into `plugins/` (Paper today — see the project [README](README.md) for
-where to get/build it) and start the server once. That generates
-`plugins/AiCompanion/config.yml`, `server-info.md`, and a `kb/` folder — the plugin won't answer
-questions usefully until you touch at least two of those (an API key, and your own server info).
+- **Paper:** drop the jar in `plugins/`, start the server once. Generates
+  `plugins/AiCompanion/config.yml`, `server-info.md`, and a `kb/` folder.
+- **Fabric:** drop the jar in `mods/`, start the server once. Generates
+  `config/aicompanion/config.yml`, `server-info.md`, and a `kb/` folder.
+
+Either way, the plugin/mod won't answer questions usefully until you touch at least two of those
+files: an API key, and your own server info.
 
 ## 2. Pick an AI provider and get a FREE key
 
@@ -62,9 +67,10 @@ Example model id: `"claude-sonnet-5-20260101"` (check Anthropic's docs for the c
 
 ### After changing any of this
 
-Run `/aicompanion reload` (alias `/aic`, needs the `aicompanion.reload` permission, default op) or
-restart the server. Pending questions, 24h item-give cooldowns, and conversation history all
-survive a reload — only config.yml/server-info.md/kb/ get re-read.
+Run `/aicompanion reload` or restart the server. Pending questions, 24h item-give cooldowns, and
+conversation history all survive a reload — only config.yml/server-info.md/kb/ get re-read.
+Needs op-equivalent permission: on Paper that's the `aicompanion.reload` permission (default op,
+alias `/aic`); on Fabric it's vanilla's permission level 4 (the same level `/op` grants).
 
 ## 3. Describe your own server
 
