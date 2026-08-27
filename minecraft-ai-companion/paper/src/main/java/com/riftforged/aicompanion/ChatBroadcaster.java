@@ -16,8 +16,23 @@ import java.util.List;
  * round trip, since the plugin runs in-process.
  */
 public final class ChatBroadcaster {
-    public static final String BOT_NAME = "mcAi";
+    public static final String DEFAULT_BOT_NAME = "mcAi";
     public static final int MC_CHAT_LIMIT = 256;
+
+    // Both set once per (re)load from AiCompanionPlugin — a static config point rather than
+    // threading extra parameters through every AskProcessor call site, since this is the one
+    // place a fully-built chat line already exists right before it goes out, same shape as how
+    // Fabric's GameBridge.sendChat implementation owns this instead.
+    private static volatile DiscordWebhook discordWebhook = null;
+    private static volatile String botName = DEFAULT_BOT_NAME;
+
+    public static void configureDiscordWebhook(DiscordWebhook webhook) {
+        discordWebhook = webhook;
+    }
+
+    public static void configureBotName(String name) {
+        botName = (name == null || name.isBlank()) ? DEFAULT_BOT_NAME : name;
+    }
 
     private ChatBroadcaster() {}
 
@@ -47,6 +62,9 @@ public final class ChatBroadcaster {
     public static void sendChat(Plugin plugin, String message, boolean broadcast) {
         String safe = com.riftforged.aicompanion.ai.AiClient.sanitize(message, MC_CHAT_LIMIT);
         plugin.getLogger().info("[ai-companion] -> " + safe);
+        if (discordWebhook != null) {
+            discordWebhook.send(safe);
+        }
         Component component = formatted(safe);
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (broadcast) {
@@ -70,7 +88,7 @@ public final class ChatBroadcaster {
     }
 
     private static Component formatted(String safe) {
-        return Component.text(BOT_NAME, NamedTextColor.BLUE, TextDecoration.BOLD)
+        return Component.text(botName, NamedTextColor.BLUE, TextDecoration.BOLD)
             .append(Component.text(" > ", NamedTextColor.GRAY))
             .append(Component.text(safe, NamedTextColor.WHITE));
     }

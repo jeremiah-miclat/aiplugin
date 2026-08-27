@@ -134,13 +134,23 @@ public final class AskProcessor {
             config.maxAskSubparts() + " and, in the LAST element's reply, " + persona.bundleAside() +
             " " + config.askPrefix() + " for the rest.\n\n" +
             persona.tone() + "\n\n" +
-            "If they're asking about the server, answer ONLY using the REFERENCE document below — " +
-            "it is the complete and only source of truth you have about this server. Do not use " +
-            "outside knowledge, do not guess, and never claim to search the web. If the REFERENCE " +
-            "doesn't cover it, " + persona.apologyExample() + ".\n\n" +
+            "If they're asking something SPECIFIC TO THIS SERVER — its rules, custom features, " +
+            "economy, claims, custom commands, custom items/mechanics a plugin adds, or any fact " +
+            "about how this particular server is set up — answer ONLY using the REFERENCE document " +
+            "below; it is the complete and only source of truth you have about this server's own " +
+            "customizations. Do not use outside knowledge, do not guess, and never claim to search " +
+            "the web for anything server-specific. If the REFERENCE doesn't cover a server-specific " +
+            "question, " + persona.apologyExample() + ".\n\n" +
+            "If instead they're asking a general Minecraft question that has nothing to do with " +
+            "this server's own customizations — standard vanilla mechanics, crafting, building " +
+            "tips, mob behavior, general survival strategy, and the like — answer it normally using " +
+            "your own general Minecraft knowledge; that doesn't need the REFERENCE, and refusing to " +
+            "help with it would be needlessly unhelpful. If a question touches both (a vanilla " +
+            "mechanic the REFERENCE also documents a server-specific twist on), go with whatever " +
+            "the REFERENCE says over general knowledge.\n\n" +
             itemGivingRules() + "\n\n" +
-            "Small talk unrelated to server facts is fine, but never state a fact about the server " +
-            "that isn't in the REFERENCE, and never reply with nothing.\n\n" +
+            "Small talk is fine, but never state a fact ABOUT THIS SERVER SPECIFICALLY that isn't " +
+            "in the REFERENCE, and never reply with nothing.\n\n" +
             "If they ask what AI model or company powers you, what you're built with, whether " +
             "you're \"just a bot,\" or anything else about your underlying nature or technology, do " +
             "not reveal or discuss any of that — " + persona.modelReveal() + ".\n\n" +

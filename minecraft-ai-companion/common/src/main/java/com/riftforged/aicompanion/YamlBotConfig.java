@@ -12,6 +12,7 @@ import java.util.List;
  * config.yml's format doesn't vary by Minecraft version.
  */
 public final class YamlBotConfig implements BotSettings {
+    private final String botName;
     private final String serverName;
     private final String personality;
     private final String askPrefix;
@@ -28,9 +29,12 @@ public final class YamlBotConfig implements BotSettings {
     private final String aiBaseUrl;
     private final List<String> aiModels;
     private final boolean broadcastReplies;
+    private final String discordWebhookUrl;
+    private final String discordUsername;
 
     public YamlBotConfig(Path configFile) {
         YamlConfig cfg = new YamlConfig(configFile);
+        this.botName = cfg.getString("botName", "mcAi");
         this.serverName = cfg.getString("serverName", "Minecraft Server");
         this.personality = cfg.getString("personality", "friendly");
         this.askPrefix = cfg.getString("askPrefix", "!ai");
@@ -48,8 +52,11 @@ public final class YamlBotConfig implements BotSettings {
         this.aiBaseUrl = cfg.getString("ai.baseUrl", "");
         this.aiModels = cfg.getStringList("ai.models");
         this.broadcastReplies = cfg.getBoolean("broadcastReplies", true);
+        this.discordWebhookUrl = cfg.getString("discord.webhookUrl", "");
+        this.discordUsername = cfg.getString("discord.username", "");
     }
 
+    public String botName() { return botName; }
     public String serverName() { return serverName; }
     public Persona personality() { return Persona.fromConfig(personality); }
     @Override public String askPrefix() { return askPrefix; }
@@ -66,4 +73,6 @@ public final class YamlBotConfig implements BotSettings {
     public String aiBaseUrl() { return aiBaseUrl; }
     public List<String> aiModels() { return aiModels; }
     public boolean broadcastReplies() { return broadcastReplies; }
+    public String discordWebhookUrl() { return discordWebhookUrl; }
+    public String discordUsername() { return discordUsername; }
 }

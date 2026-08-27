@@ -105,6 +105,7 @@ never to offer one, and if it ever ignores that, the plugin overrides its reply 
 
 | Key | What it does |
 |---|---|
+| `botName` | the name shown in chat before every bot message, default `"mcAi"` |
 | `personality` | `"friendly"` or `"trashtalk"` — the bot's tone |
 | `askPrefix` | the chat prefix players type, default `"!ai"` |
 | `batchWindowMs` | how often queued questions go out as one AI call (default 10s) |
@@ -112,6 +113,30 @@ never to offer one, and if it ever ignores that, the plugin overrides its reply 
 | `askCooldownSeconds` | per-player pacing independent of `batchWindowMs` — see the comment in config.yml |
 | `maxAskSubparts` | how many distinct requests one message can resolve at once |
 | `broadcastReplies` | `true` = bot replies go to server-wide chat; `false` = console log only |
+
+## 6. Mirror chat to Discord (optional)
+
+Every bot chat line (join greetings, `!ai` replies) can be relayed into a Discord channel via an
+incoming webhook — no DiscordSRV or other bridge plugin needed, works with any Discord server:
+
+1. In Discord: the target channel's settings → Integrations → Webhooks → New Webhook → Copy
+   Webhook URL.
+2. In `config.yml`:
+   ```yaml
+   discord:
+     webhookUrl: "https://discord.com/api/webhooks/..."
+     username: ""   # optional — overrides the name Discord shows; blank uses the webhook's own
+   ```
+3. `/aicompanion reload` or restart.
+
+Leave `webhookUrl` blank (the default) to keep this off — nothing is sent anywhere. A relay
+failure (bad URL, Discord down, rate-limited) is logged and dropped; it never affects the in-game
+reply that triggered it. Only actual chat lines are mirrored — per-player bookkeeping notices
+(cooldown/queue-full messages) are not, since those aren't newsworthy outside the game.
+
+Want it to ride through the exact channel/bot identity an existing DiscordSRV bridge already uses
+instead of a separate webhook post? That's a deeper integration (DiscordSRV's own Java API) that
+isn't built — ask if you want it added.
 
 ## Security notes
 

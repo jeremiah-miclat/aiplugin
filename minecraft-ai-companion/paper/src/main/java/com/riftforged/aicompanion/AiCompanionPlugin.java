@@ -100,6 +100,10 @@ public final class AiCompanionPlugin extends JavaPlugin {
 
         this.askProcessor = new AskProcessor(this, config, messages, kb, aiClient, memory, rateLimiter);
 
+        ChatBroadcaster.configureBotName(config.botName());
+        ChatBroadcaster.configureDiscordWebhook(
+            new DiscordWebhook(config.discordWebhookUrl(), config.discordUsername(), getLogger()));
+
         // Listeners hold final references to config/messages/askProcessor, so they can't just be
         // patched in place — drop and re-register them with the freshly built ones.
         HandlerList.unregisterAll(this);

@@ -7,6 +7,7 @@ import java.util.List;
 
 /** Typed view over config.yml — mirrors config.json from the original watcher.js. */
 public final class BotConfig {
+    private final String botName;
     private final String serverName;
     private final String personality;
     private final String askPrefix;
@@ -23,8 +24,11 @@ public final class BotConfig {
     private final String aiBaseUrl;
     private final List<String> aiModels;
     private final boolean broadcastReplies;
+    private final String discordWebhookUrl;
+    private final String discordUsername;
 
     public BotConfig(FileConfiguration cfg) {
+        this.botName = cfg.getString("botName", "mcAi");
         this.serverName = cfg.getString("serverName", "Minecraft Server");
         this.personality = cfg.getString("personality", "friendly");
         this.askPrefix = cfg.getString("askPrefix", "!ai");
@@ -46,8 +50,11 @@ public final class BotConfig {
         this.aiBaseUrl = cfg.getString("ai.baseUrl", "");
         this.aiModels = cfg.getStringList("ai.models");
         this.broadcastReplies = cfg.getBoolean("broadcastReplies", true);
+        this.discordWebhookUrl = cfg.getString("discord.webhookUrl", "");
+        this.discordUsername = cfg.getString("discord.username", "");
     }
 
+    public String botName() { return botName; }
     public String serverName() { return serverName; }
     public Persona personality() { return Persona.fromConfig(personality); }
     public String askPrefix() { return askPrefix; }
@@ -64,4 +71,6 @@ public final class BotConfig {
     public String aiBaseUrl() { return aiBaseUrl; }
     public List<String> aiModels() { return aiModels; }
     public boolean broadcastReplies() { return broadcastReplies; }
+    public String discordWebhookUrl() { return discordWebhookUrl; }
+    public String discordUsername() { return discordUsername; }
 }

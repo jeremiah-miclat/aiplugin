@@ -1,6 +1,7 @@
 package com.riftforged.aicompanion.fabric;
 
 import com.riftforged.aicompanion.AskProcessor;
+import com.riftforged.aicompanion.DiscordWebhook;
 import com.riftforged.aicompanion.Messages;
 import com.riftforged.aicompanion.YamlBotConfig;
 import com.riftforged.aicompanion.ai.AiClient;
@@ -17,6 +18,7 @@ import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,6 +60,7 @@ public final class AiCompanionMod implements ModInitializer {
         return t;
     });
     private ScheduledFuture<?> windowTask;
+    private MinecraftServer server;
 
     @Override
     public void onInitialize() {
@@ -66,7 +69,7 @@ public final class AiCompanionMod implements ModInitializer {
         this.memory = new ConversationMemory();
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            this.bridge = new FabricGameBridge(() -> server, LOGGER);
+            this.server = server;
             this.stateStore = new StateStore(CONFIG_DIR.resolve("state.json"), LOGGER);
 
             StateStore.Data saved = stateStore.load();
@@ -152,6 +155,9 @@ public final class AiCompanionMod implements ModInitializer {
             LOGGER.warning("[ai-companion] ai.apiKey is not set in config.yml — every AI call will "
                 + "fail until an admin fills in a real API key for ai.provider (" + config.aiProvider() + ").");
         }
+
+        DiscordWebhook discordWebhook = new DiscordWebhook(config.discordWebhookUrl(), config.discordUsername(), LOGGER);
+        this.bridge = new FabricGameBridge(() -> server, LOGGER, discordWebhook, config.botName());
 
         this.messages = new Messages(config.personality(), config);
         KnowledgeBase kb = new KnowledgeBase(CONFIG_DIR.resolve("kb"), CONFIG_DIR.resolve("server-info.md"));

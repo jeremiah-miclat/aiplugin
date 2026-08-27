@@ -1,6 +1,7 @@
 package com.riftforged.aicompanion.fabric;
 
 import com.riftforged.aicompanion.ChatFormat;
+import com.riftforged.aicompanion.DiscordWebhook;
 import com.riftforged.aicompanion.GameBridge;
 import com.riftforged.aicompanion.ItemClassifier;
 import net.minecraft.item.Item;
@@ -28,10 +29,14 @@ import java.util.logging.Logger;
 public final class FabricGameBridge implements GameBridge {
     private final Supplier<MinecraftServer> serverSupplier;
     private final Logger logger;
+    private final DiscordWebhook discordWebhook;
+    private final String botName;
 
-    public FabricGameBridge(Supplier<MinecraftServer> serverSupplier, Logger logger) {
+    public FabricGameBridge(Supplier<MinecraftServer> serverSupplier, Logger logger, DiscordWebhook discordWebhook, String botName) {
         this.serverSupplier = serverSupplier;
         this.logger = logger;
+        this.discordWebhook = discordWebhook;
+        this.botName = (botName == null || botName.isBlank()) ? ChatFormat.DEFAULT_BOT_NAME : botName;
     }
 
     @Override
@@ -68,6 +73,7 @@ public final class FabricGameBridge implements GameBridge {
     public void sendChat(String message, boolean broadcast) {
         String safe = com.riftforged.aicompanion.ai.AiClient.sanitize(message, ChatFormat.MC_CHAT_LIMIT);
         logger.info("[ai-companion] -> " + safe);
+        discordWebhook.send(safe);
         Text component = formatted(safe);
         MinecraftServer server = serverSupplier.get();
         server.execute(() -> {
@@ -103,8 +109,8 @@ public final class FabricGameBridge implements GameBridge {
         return "name:" + playerName.toLowerCase();
     }
 
-    private static Text formatted(String safe) {
-        return Text.literal(ChatFormat.BOT_NAME).styled(s -> s.withColor(Formatting.BLUE).withBold(true))
+    private Text formatted(String safe) {
+        return Text.literal(botName).styled(s -> s.withColor(Formatting.BLUE).withBold(true))
             .append(Text.literal(" > ").styled(s -> s.withColor(Formatting.GRAY)))
             .append(Text.literal(safe).styled(s -> s.withColor(Formatting.WHITE)));
     }

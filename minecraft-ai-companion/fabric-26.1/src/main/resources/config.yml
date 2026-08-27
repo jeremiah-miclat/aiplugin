@@ -6,6 +6,9 @@
 # file showing the format. Replace/expand both with your own server's actual details. Both are
 # re-read live on every question, no reload needed.
 
+# The name shown in chat before every bot message (e.g. "mcAi > Cseph: ...").
+botName: "mcAi"
+
 serverName: "My Minecraft Server"
 
 # "friendly" or "trashtalk" — see Persona.java for what each sounds like.
@@ -92,3 +95,13 @@ ai:
     - "openai/gpt-oss-20b"
     - "qwen/qwen3.6-27b"
     - "qwen/qwen3.8-27b"
+
+# Optional: mirror every bot chat line (join greetings, "!ai" replies) into a Discord channel via
+# an incoming webhook. No dependency on DiscordSRV or any other bridge plugin - works with any
+# Discord server. To set up: Discord channel settings -> Integrations -> Webhooks -> New Webhook
+# -> Copy Webhook URL. Leave blank (the default) to disable - nothing is sent anywhere.
+discord:
+  webhookUrl: ""
+  # Optional: override the name Discord shows for these messages. Leave blank to use the webhook's
+  # own configured name.
+  username: ""

@@ -6,7 +6,9 @@ import java.util.List;
 /** Shared chat-formatting constants/logic — ports MC_CHAT_LIMIT/BOT_NAME/packLines from Paper's
  *  ChatBroadcaster so both Fabric modules (and AskProcessor here in common) use identical values. */
 public final class ChatFormat {
-    public static final String BOT_NAME = "mcAi";
+    /** Fallback only — the actual display name is configurable via config.yml's "botName" key
+     *  (see YamlBotConfig/BotConfig); this is what's used if that's ever unset or blank. */
+    public static final String DEFAULT_BOT_NAME = "mcAi";
     public static final int MC_CHAT_LIMIT = 256;
 
     private ChatFormat() {}
