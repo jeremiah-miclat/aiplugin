@@ -1,0 +1,16 @@
+name: AiCompanion
+version: '${project.version}'
+main: com.riftforged.aicompanion.AiCompanionPlugin
+api-version: '1.21'
+author: AiCompanion
+description: In-game AI chat companion (join greetings, "!ai" Q&A, item gives) — OpenRouter, OpenAI-compatible, or Anthropic.
+commands:
+  aicompanion:
+    description: Manage the AI Companion plugin.
+    usage: /<command> reload
+    aliases: [aic]
+    permission: aicompanion.reload
+permissions:
+  aicompanion.reload:
+    description: Reload the AI Companion plugin's config.yml, server-info.md, and kb/ files.
+    default: op

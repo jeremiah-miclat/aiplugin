@@ -1,0 +1,11 @@
+{
+  "name": "ai-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Watches the PaperMC server log and greets/answers players via OpenRouter API + RCON",
+  "main": "watcher.js",
+  "dependencies": {
+    "rcon-client": "^4.2.5",
+    "axios": "^1.6.2"
+  }
+}

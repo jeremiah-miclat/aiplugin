@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.riftforged</groupId>
+  <artifactId>ai-companion-paper</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!--
+      Deliberately compiled against the 1.21.11 Paper API (the last release
+      before Mojang's 2026 switch to year.drop.hotfix versioning) and to
+      Java 21 bytecode, NOT the newer 26.x API/Java 25 baseline. Paper's API
+      surface is additive across versions, so a jar built this way loads
+      fine on a 26.x server too (a Java 25 JVM runs Java 21 class files
+      without issue) - going the other direction would not: 26.x-compiled
+      code can call methods that don't exist on a 1.21.11 server, and Java
+      25 bytecode can't load on 1.21.11's Java 21 JVM at all. Only add a
+      version-gated code path here if real testing on a 26.x server turns up
+      an actual incompatibility.
+    -->
+    <maven.compiler.release>21</maven.compiler.release>
+    <paper.api.version>1.21.11-R0.1-SNAPSHOT</paper.api.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>papermc</id>
+      <url>https://repo.papermc.io/repository/maven-public/</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.papermc.paper</groupId>
+      <artifactId>paper-api</artifactId>
+      <version>${paper.api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- Shaded + relocated so it can't collide with whatever Gson version
+         the server or other plugins put on the classpath at runtime. -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.11.0</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>${project.artifactId}-${project.version}</finalName>
+    <!--
+      Only plugin.yml gets ${...} substitution (for its version: line below) - config.yml,
+      server-info.md, and kb/*.md stay unfiltered so an admin's own content is never at risk of
+      Maven trying to interpolate a stray "${...}" they happen to type.
+    -->
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>plugin.yml</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>plugin.yml</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <relocations>
+                <relocation>
+                  <pattern>com.google.gson</pattern>
+                  <shadedPattern>com.riftforged.aicompanion.libs.gson</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

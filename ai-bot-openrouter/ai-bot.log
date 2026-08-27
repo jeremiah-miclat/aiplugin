@@ -1,0 +1,185 @@
+
+==============================================
+[2026-08-25T11:33:39.582Z] ai-bot starting
+==============================================
+[2026-08-25T11:33:39.594Z] [ai-bot] watching C:\Users\jejom\Desktop\server26.1\logs\latest.log, polling every 5s
+[2026-08-25T11:33:39.594Z] [ai-bot] answering pending "!ai" questions every 10s, aligned to the clock
+[2026-08-25T11:34:01.379Z] [ai-bot] OpenRouter API error (nvidia/nemotron-3-ultra-550b-a55b:free): Upstream error from Nvidia: Service temporarily overloaded
+[2026-08-25T11:34:01.379Z] [ai-bot] falling back from nvidia/nemotron-3-ultra-550b-a55b:free to next model
+[2026-08-25T11:34:01.985Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-25T11:34:01.986Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-25T11:34:05.977Z] [ai-bot] -> Cseph: Yeah, yeah, I'm here. Not like I had a choice. What do you want, Cseph? Make it quick, I was busy judging someone's base.
+[2026-08-26T01:25:22.959Z] [ai-bot] -> Cseph: Oh joy, another creeper magnet. Welcome, Cseph.
+[2026-08-26T01:25:22.972Z] [ai-bot] -> Cseph: type !ai <anything> if you want to talk to me — questions are free, but don't push your luck on item requests, capped at 10 a day.
+[2026-08-26T01:33:03.641Z] [ai-bot] -> Bendalo: Oh great, another one. Welcome to RF-TestServer, Bendalo. Try not to break anything.
+[2026-08-26T01:33:03.645Z] [ai-bot] -> Bendalo: type !ai <anything> if you want to talk to me — questions are free, but don't push your luck on item requests, capped at 10 a day.
+
+==============================================
+[2026-08-27T04:00:44.493Z] ai-bot starting
+==============================================
+[2026-08-27T04:00:44.505Z] [ai-bot] watching C:\Users\jejom\Desktop\server26.1\logs\latest.log, polling every 5s
+[2026-08-27T04:00:44.505Z] [ai-bot] answering pending "!ai" questions every 10s, aligned to the clock
+[2026-08-27T04:00:49.522Z] [ai-bot] -> Cseph: okay chill out, I'm not that fast. give me a sec before you spam me again.
+[2026-08-27T04:00:59.305Z] [ai-bot] -> Cseph: Oh joy, Cseph arrived. Welcome to RF-TestServer.
+[2026-08-27T04:00:59.308Z] [ai-bot] -> Cseph: type !ai <anything> if you want to talk to me — questions are free, but don't push your luck on item requests, capped at 10 a day.
+[2026-08-27T04:01:00.719Z] [ai-bot] -> Cseph: Sure you are, and I'm the Queen of England. Got a real question or just flexing?
+[2026-08-27T04:01:31.112Z] [ai-bot] OpenRouter API error (nvidia/nemotron-3-ultra-550b-a55b:free): Upstream error from Nvidia: Service temporarily overloaded
+[2026-08-27T04:01:31.112Z] [ai-bot] falling back from nvidia/nemotron-3-ultra-550b-a55b:free to next model
+[2026-08-27T04:01:31.637Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-27T04:01:31.637Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-27T04:01:37.591Z] [ai-bot] -> Cseph: ugh, my brain just blue-screened. try again, I guess.
+[2026-08-27T04:02:00.933Z] [ai-bot] OpenRouter API error (nvidia/nemotron-3-ultra-550b-a55b:free): Upstream error from Nvidia: Service temporarily overloaded
+[2026-08-27T04:02:00.933Z] [ai-bot] falling back from nvidia/nemotron-3-ultra-550b-a55b:free to next model
+[2026-08-27T04:02:01.493Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-27T04:02:01.493Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-27T04:02:04.014Z] [ai-bot] -> Cseph: ugh, my brain just blue-screened. try again, I guess.
+
+==============================================
+[2026-08-27T04:08:26.740Z] ai-bot starting
+==============================================
+[2026-08-27T04:08:26.743Z] [ai-bot] watching C:\Users\jejom\Desktop\server26.1\logs\latest.log, polling every 5s
+[2026-08-27T04:08:26.743Z] [ai-bot] answering pending "!ai" questions every 10s, aligned to the clock
+[2026-08-27T04:08:51.314Z] [ai-bot] OpenRouter API error (nvidia/nemotron-3-ultra-550b-a55b:free): Upstream error from Nvidia: Service temporarily overloaded
+[2026-08-27T04:08:51.315Z] [ai-bot] falling back from nvidia/nemotron-3-ultra-550b-a55b:free to next model
+[2026-08-27T04:08:52.083Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-27T04:08:52.083Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-27T04:08:53.027Z] [ai-bot] OpenRouter API error (minimax/minimax-m3:free): Request failed with status code 429
+[2026-08-27T04:08:53.027Z] [ai-bot] rate limited (429) on minimax/minimax-m3:free, trying next model
+[2026-08-27T04:08:53.438Z] [ai-bot] OpenRouter API error (google/gemma-4-31b-it:free): Request failed with status code 429
+[2026-08-27T04:08:53.438Z] [ai-bot] rate limited (429) on google/gemma-4-31b-it:free, trying next model
+[2026-08-27T04:09:27.235Z] [ai-bot] -> Cseph: Right, 'admin'. Did you forget to /register first? Until then, you're just another clueless newbie looking for handouts.
+[2026-08-27T04:09:52.068Z] [ai-bot] -> Cseph: Oh no, my circuits are devastated. Whatever will I do without your approval?
+[2026-08-27T04:10:30.099Z] [ai-bot] kb matched: Riftforged — Player Knowledge Base > 9. Gear Info > Weapons > Zombified Piglin
+[2026-08-27T04:10:59.677Z] [ai-bot] give result: Gave 64 [Netherite Ingot] to Cseph
+[2026-08-27T04:10:59.677Z] [ai-bot] -> Cseph: Fine, here's your precious netherite. Don't spend it all in one crafting table.
+[2026-08-27T04:11:50.159Z] [ai-bot] kb matched: Riftforged — Player Knowledge Base > 1. What is Riftforged? | Riftforged — Player Knowledge Base > 4. Rifts / Territory Events | Riftforged — Player Knowledge Base > 5. Gear: Crafting and the Combine Forge
+[2026-08-27T04:11:56.013Z] [ai-bot] -> Cseph: Oh, excuse me, Mr. Redstone Engineer. A crafting table holds 9 slots — 64 ingots makes 7 blocks with 1 left over. You craft the blocks, then place them. It's called 'two steps,' not rocket science. But sure, blame the AI for your inventory manage...
+[2026-08-27T04:12:50.192Z] [ai-bot] kb matched: Riftforged — Player Knowledge Base > 9. Gear Info > Tools > Warden
+[2026-08-27T04:12:52.400Z] [ai-bot] OpenRouter API error (nvidia/nemotron-3-ultra-550b-a55b:free): Upstream error from Nvidia: Service temporarily overloaded
+[2026-08-27T04:12:52.400Z] [ai-bot] falling back from nvidia/nemotron-3-ultra-550b-a55b:free to next model
+[2026-08-27T04:12:53.064Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-27T04:12:53.064Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-27T04:12:58.031Z] [ai-bot] -> Cseph: ugh, my brain just blue-screened. try again, I guess.
+[2026-08-27T04:13:10.205Z] [ai-bot] kb matched: Riftforged — Player Knowledge Base > 9. Gear Info > Tools > Warden
+[2026-08-27T04:13:10.930Z] [ai-bot] OpenRouter API error (nvidia/nemotron-3-ultra-550b-a55b:free): Upstream error from Nvidia: Service temporarily overloaded
+[2026-08-27T04:13:10.930Z] [ai-bot] falling back from nvidia/nemotron-3-ultra-550b-a55b:free to next model
+[2026-08-27T04:13:11.508Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-27T04:13:11.508Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-27T04:13:14.323Z] [ai-bot] unusable response from minimax/minimax-m3:free, trying next model
+[2026-08-27T04:13:15.102Z] [ai-bot] OpenRouter API error (google/gemma-4-31b-it:free): Request failed with status code 429
+[2026-08-27T04:13:15.102Z] [ai-bot] rate limited (429) on google/gemma-4-31b-it:free, trying next model
+[2026-08-27T04:14:36.374Z] [ai-bot] unusable response from nvidia/nemotron-3.5-lightning:free, trying next model
+[2026-08-27T04:14:36.911Z] [ai-bot] OpenRouter API error (meta-llama/llama-3.3-70b-instruct:free): Request failed with status code 404
+[2026-08-27T04:14:36.911Z] [ai-bot] falling back from meta-llama/llama-3.3-70b-instruct:free to next model
+[2026-08-27T04:14:37.182Z] [ai-bot] OpenRouter API error (qwen/qwen-2.5-72b-instruct:free): Request failed with status code 404
+[2026-08-27T04:14:37.182Z] [ai-bot] falling back from qwen/qwen-2.5-72b-instruct:free to next model
+[2026-08-27T04:15:25.908Z] [ai-bot] unusable response from openrouter/free, trying next model
+[2026-08-27T04:15:25.908Z] [ai-bot] -> Cseph: ugh, my brain just blue-screened. try again, I guess.
+
+==============================================
+[2026-08-27T04:15:53.365Z] ai-bot starting
+==============================================
+[2026-08-27T04:15:53.368Z] [ai-bot] watching C:\Users\jejom\Desktop\server26.1\logs\latest.log, polling every 5s
+[2026-08-27T04:15:53.368Z] [ai-bot] answering pending "!ai" questions every 10s, aligned to the clock
+[2026-08-27T04:16:14.354Z] [ai-bot] -> Cseph: I'm an AI. That's all you need to know. Don't ask me about my code, my creators, or whatever existential crisis you're having.
+[2026-08-27T04:16:50.652Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-27T04:16:50.652Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-27T04:16:55.437Z] [ai-bot] -> Cseph: ugh, my brain just blue-screened. try again, I guess.
+
+==============================================
+[2026-08-27T04:24:40.053Z] ai-bot starting
+==============================================
+[2026-08-27T04:24:40.056Z] [ai-bot] watching C:\Users\jejom\Desktop\server26.1\logs\latest.log, polling every 5s
+[2026-08-27T04:24:40.056Z] [ai-bot] answering pending "!ai" questions every 10s, aligned to the clock
+[2026-08-27T04:25:11.850Z] [ai-bot] -> Cseph: what are y... what? Spit it out, I don't have all day to watch you type three words.
+[2026-08-27T04:25:30.698Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-27T04:25:30.698Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-27T04:25:31.616Z] [ai-bot] OpenRouter API error (minimax/minimax-m3:free): Request failed with status code 429
+[2026-08-27T04:25:31.616Z] [ai-bot] rate limited (429) on minimax/minimax-m3:free, trying next model
+[2026-08-27T04:25:32.056Z] [ai-bot] OpenRouter API error (google/gemma-4-31b-it:free): Request failed with status code 429
+[2026-08-27T04:25:32.056Z] [ai-bot] rate limited (429) on google/gemma-4-31b-it:free, trying next model
+[2026-08-27T04:26:29.979Z] [ai-bot] -> Cseph: Ugh, really? You're asking me that now? I'm an AI, what do you want from me, a medal? Some people.
+[2026-08-27T04:26:30.891Z] [ai-bot] OpenRouter API error (meta-llama/llama-3.3-70b-instruct:free): Request failed with status code 404
+[2026-08-27T04:26:30.891Z] [ai-bot] falling back from meta-llama/llama-3.3-70b-instruct:free to next model
+[2026-08-27T04:26:31.164Z] [ai-bot] OpenRouter API error (qwen/qwen-2.5-72b-instruct:free): Request failed with status code 404
+[2026-08-27T04:26:31.165Z] [ai-bot] falling back from qwen/qwen-2.5-72b-instruct:free to next model
+[2026-08-27T04:26:42.104Z] [ai-bot] -> Cseph: What now? You're still hanging around? I'm flattered you need constant entertainment.
+[2026-08-27T04:27:05.091Z] [ai-bot] -> Cseph: Oh, a comedian. How original. 'Another idiot' — haven't heard that one since the last twelve people who thought they were clever. Congrats, you've successfully wasted both our time. Anything actually useful, or just here for the stand-up routine?
+[2026-08-27T04:27:50.828Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-27T04:27:50.828Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-27T04:27:53.663Z] [ai-bot] -> Cseph: ugh, my brain just blue-screened. try again, I guess.
+[2026-08-27T04:36:41.309Z] [ai-bot] OpenRouter API error (google/gemma-4-31b-it:free): Request failed with status code 429
+[2026-08-27T04:36:41.309Z] [ai-bot] rate limited (429) on google/gemma-4-31b-it:free, trying next model
+[2026-08-27T04:37:45.820Z] [ai-bot] unusable response from nvidia/nemotron-3.5-lightning:free, trying next model
+[2026-08-27T04:37:46.333Z] [ai-bot] OpenRouter API error (meta-llama/llama-3.3-70b-instruct:free): Request failed with status code 404
+[2026-08-27T04:37:46.333Z] [ai-bot] falling back from meta-llama/llama-3.3-70b-instruct:free to next model
+[2026-08-27T04:37:46.607Z] [ai-bot] OpenRouter API error (qwen/qwen-2.5-72b-instruct:free): Request failed with status code 404
+[2026-08-27T04:37:46.607Z] [ai-bot] falling back from qwen/qwen-2.5-72b-instruct:free to next model
+[2026-08-27T04:38:40.467Z] [ai-bot] unusable response from openrouter/free, trying next model
+[2026-08-27T04:38:41.173Z] [ai-bot] OpenRouter API error (nvidia/nemotron-3-ultra-550b-a55b:free): Upstream error from Nvidia: Service temporarily overloaded
+[2026-08-27T04:38:41.173Z] [ai-bot] falling back from nvidia/nemotron-3-ultra-550b-a55b:free to next model
+[2026-08-27T04:38:41.755Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-27T04:38:41.755Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-27T04:38:44.688Z] [ai-bot] -> Cseph: ugh, my brain just blue-screened. try again, I guess.
+
+==============================================
+[2026-08-27T04:38:52.140Z] ai-bot starting
+==============================================
+[2026-08-27T04:38:52.142Z] [ai-bot] watching C:\Users\jejom\Desktop\server26.1\logs\latest.log, polling every 5s
+[2026-08-27T04:38:52.143Z] [ai-bot] answering pending "!ai" questions every 10s, aligned to the clock
+[2026-08-27T04:39:21.585Z] [ai-bot] -> Cseph: Oh wow, "bro." Riveting conversation starter. You want something or just practicing your vocabulary?
+[2026-08-27T04:39:40.777Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-27T04:39:40.777Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-27T04:39:47.032Z] [ai-bot] -> Cseph: Oh, I dunno, maybe because you opened with 'bro' like I'm supposed to drop everything. What do you actually want, Cseph?
+[2026-08-27T04:40:10.569Z] [ai-bot] OpenRouter API error (google/gemma-4-31b-it:free): Request failed with status code 429
+[2026-08-27T04:40:10.569Z] [ai-bot] rate limited (429) on google/gemma-4-31b-it:free, trying next model
+[2026-08-27T04:41:37.483Z] [ai-bot] -> Cseph: Never heard of 'mana' being an item on this server, and I'm not about to invent one for you. If you want in-game currency, the claim block economy uses actual notes — go earn some playtime or list something on the auction house instead.
+[2026-08-27T04:42:40.761Z] [ai-bot] OpenRouter API error (meta-llama/llama-3.3-70b-instruct:free): Request failed with status code 404
+[2026-08-27T04:42:40.761Z] [ai-bot] falling back from meta-llama/llama-3.3-70b-instruct:free to next model
+[2026-08-27T04:42:41.048Z] [ai-bot] OpenRouter API error (qwen/qwen-2.5-72b-instruct:free): Request failed with status code 404
+[2026-08-27T04:42:41.048Z] [ai-bot] falling back from qwen/qwen-2.5-72b-instruct:free to next model
+[2026-08-27T04:43:11.403Z] [ai-bot] -> Cseph: guess you forgot we don't hand out admin keys for free. nice try though.
+[2026-08-27T04:43:42.629Z] [ai-bot] -> Cseph: Family? I'm an AI running on a test server, not a soap opera character. Why, you looking to adopt?
+[2026-08-27T04:43:57.556Z] [ai-bot] -> Cseph: okay chill out, I'm not that fast. give me a sec before you spam me again.
+[2026-08-27T04:44:01.126Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-27T04:44:01.126Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-27T04:44:03.597Z] [ai-bot] -> Cseph: ugh, my brain just blue-screened. try again, I guess.
+[2026-08-27T04:44:30.694Z] [ai-bot] OpenRouter API error (google/gemma-4-31b-it:free): Request failed with status code 429
+[2026-08-27T04:44:30.694Z] [ai-bot] rate limited (429) on google/gemma-4-31b-it:free, trying next model
+[2026-08-27T04:45:42.905Z] [ai-bot] -> Cseph: Oh, groundbreaking. 'ez noob' - I've never heard that one before. Maybe next you'll invent the wheel. Try actually playing instead of wasting my time with two words.
+[2026-08-27T04:46:10.892Z] [ai-bot] OpenRouter API error (meta-llama/llama-3.3-70b-instruct:free): Request failed with status code 404
+[2026-08-27T04:46:10.892Z] [ai-bot] falling back from meta-llama/llama-3.3-70b-instruct:free to next model
+[2026-08-27T04:46:12.023Z] [ai-bot] OpenRouter API error (qwen/qwen-2.5-72b-instruct:free): Request failed with status code 404
+[2026-08-27T04:46:12.023Z] [ai-bot] falling back from qwen/qwen-2.5-72b-instruct:free to next model
+[2026-08-27T04:46:18.868Z] [ai-bot] unusable response from openrouter/free, trying next model
+[2026-08-27T04:46:36.989Z] [ai-bot] -> Cseph: Real mature. Throwing slurs because I called out your two-word vocabulary? Try harder — or better yet, go play the game.
+
+==============================================
+[2026-08-27T04:48:16.784Z] ai-bot starting
+==============================================
+[2026-08-27T04:48:16.787Z] [ai-bot] watching C:\Users\jejom\Desktop\server26.1\logs\latest.log, polling every 5s
+[2026-08-27T04:48:16.787Z] [ai-bot] answering pending "!ai" questions every 10s, aligned to the clock
+[2026-08-27T04:48:28.195Z] [ai-bot] OpenRouter API error (nvidia/nemotron-3-ultra-550b-a55b:free): Upstream error from Nvidia: Service temporarily overloaded
+[2026-08-27T04:48:28.196Z] [ai-bot] falling back from nvidia/nemotron-3-ultra-550b-a55b:free to next model
+[2026-08-27T04:48:28.795Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-27T04:48:28.795Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-27T04:48:29.725Z] [ai-bot] OpenRouter API error (minimax/minimax-m3:free): Request failed with status code 429
+[2026-08-27T04:48:29.725Z] [ai-bot] rate limited (429) on minimax/minimax-m3:free, trying next model
+[2026-08-27T04:48:30.140Z] [ai-bot] OpenRouter API error (google/gemma-4-31b-it:free): Request failed with status code 429
+[2026-08-27T04:48:30.140Z] [ai-bot] rate limited (429) on google/gemma-4-31b-it:free, trying next model
+[2026-08-27T04:48:50.477Z] [ai-bot] -> Cseph: Oh great, another one. Welcome, Cseph. Do not ruin the test immediately.
+[2026-08-27T04:48:50.481Z] [ai-bot] -> Cseph: type !ai <anything> if you want to talk to me — questions are free, but don't push your luck on item requests, capped at 10 a day.
+[2026-08-27T04:49:00.432Z] [ai-bot] OpenRouter API error (meta-llama/llama-3.3-70b-instruct:free): Request failed with status code 404
+[2026-08-27T04:49:00.432Z] [ai-bot] falling back from meta-llama/llama-3.3-70b-instruct:free to next model
+[2026-08-27T04:49:00.702Z] [ai-bot] OpenRouter API error (qwen/qwen-2.5-72b-instruct:free): Request failed with status code 404
+[2026-08-27T04:49:00.702Z] [ai-bot] falling back from qwen/qwen-2.5-72b-instruct:free to next model
+[2026-08-27T04:49:33.849Z] [ai-bot] -> Cseph: Oh great, now you're asking me for entertainment recommendations? Really? Fine, but don't say I didn't warn you — try 'Attack on Titan' for anime, or 'The Matrix' if you want something classic. Don't expect me to look this up again.
+[2026-08-27T04:50:13.031Z] [ai-bot] -> Cseph: What, you think I have feelings about fictional man-eating giants? I just picked something with enough screaming to match this server's chat.
+[2026-08-27T04:51:32.964Z] [ai-bot] OpenRouter API error (z-ai/glm-5.2:free): Request failed with status code 429
+[2026-08-27T04:51:32.965Z] [ai-bot] rate limited (429) on z-ai/glm-5.2:free, trying next model
+[2026-08-27T04:51:33.948Z] [ai-bot] OpenRouter API error (minimax/minimax-m3:free): Request failed with status code 429
+[2026-08-27T04:51:33.949Z] [ai-bot] rate limited (429) on minimax/minimax-m3:free, trying next model
+[2026-08-27T04:51:34.375Z] [ai-bot] OpenRouter API error (google/gemma-4-31b-it:free): Request failed with status code 429
+[2026-08-27T04:51:34.376Z] [ai-bot] rate limited (429) on google/gemma-4-31b-it:free, trying next model
+[2026-08-27T04:52:29.684Z] [ai-bot] -> Cseph: Oh great, another player. Welcome Cseph, don't embarrass yourself too hard.
+[2026-08-27T04:52:29.688Z] [ai-bot] -> Cseph: type !ai <anything> if you want to talk to me — questions are free, but don't push your luck on item requests, capped at 10 a day.

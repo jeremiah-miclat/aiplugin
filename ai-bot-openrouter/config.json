@@ -1,0 +1,31 @@
+{
+  "logPath": "../logs/latest.log",
+  "pollIntervalMs": 5000,
+  "rcon": {
+    "host": "127.0.0.1",
+    "port": 25575,
+    "password": "Gg6iUpZN1SqMKkK"
+  },
+  "serverName": "RF-TestServer",
+  "personality": "trashtalk",
+  "askPrefix": "!ai",
+  "maxRequestsPer24h": 10,
+  "batchWindowMs": 10000,
+  "maxAsksPerWindow": 10,
+  "maxAskSubparts": 3,
+  "maxGiveQuantity": 64,
+  "maxEquipmentQuantity": 1,
+  "openRouter": {
+    "apiKey": "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",
+    "models": [
+      "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "z-ai/glm-5.2:free",
+      "minimax/minimax-m3:free",
+      "google/gemma-4-31b-it:free",
+      "nvidia/nemotron-3.5-lightning:free",
+      "meta-llama/llama-3.3-70b-instruct:free",
+      "qwen/qwen-2.5-72b-instruct:free",
+      "openrouter/free"
+    ]
+  }
+}
