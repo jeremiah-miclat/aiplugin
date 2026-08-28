@@ -2,7 +2,13 @@
 
 Port of `ai-bot-openrouter/watcher.js` (a Node.js sidecar that tailed the PaperMC log and used
 RCON) into native server plugins/mods. Build order: **Paper** (done) → **Fabric** (1.21.11 done,
-26.1 blocked — see below) → Forge/NeoForge (not started).
+26.1 blocked — see below) → **NeoForge** (1.21.11, 26.1, 26.2 all done) / Forge (not started).
+
+Note NeoForge isn't hit by the same 26.x blocker as Fabric: Mojang still isn't publishing the
+`client_mappings`/`server_mappings` its version manifest needs (confirmed live against
+`piston-meta.mojang.com` for 26.2), which is what stalls Yarn (Fabric's mapping set, derived from
+those files). NeoForge's own toolchain doesn't depend on that same published-mappings channel, so
+its 26.1/26.2 releases build and work fine despite the gap.
 
 **Server-agnostic by design:** the original `watcher.js` shipped with one specific server's
 lore/rules baked into its KB file. Nothing here is patterned to any particular server — every bit
@@ -87,6 +93,13 @@ releases/
         ai-companion-fabric-1.0.0.jar
       26.1/                                    <- once fabric-26.1's build is unblocked
         ai-companion-fabric-1.0.0.jar
+    neoforge/
+      1.21.11/
+        ai-companion-neoforge-1.0.0.jar
+      26.1/
+        ai-companion-neoforge-1.0.0.jar
+      26.2/
+        ai-companion-neoforge-1.0.0.jar
     forge/
       1.21.11/
         ...
@@ -175,9 +188,59 @@ automatically like `fabric-1.21.11`.
 
 Different mapping set, real naming differences worth knowing about if you pick this back up:
 Mojang mappings use `ServerPlayer`/`MinecraftServer` (not Yarn's `ServerPlayerEntity`),
-`net.minecraft.resources.Identifier` (not `ResourceLocation` — genuinely renamed in this version),
+`net.minecraft.resources.Identifier` (not `ResourceLocation` — already renamed by 1.21.11 too,
+confirmed via `javap` while building `neoforge-1.21.11/`, not a 26.x-only change as first assumed),
 `BuiltInRegistries`/`Registry.getOptional(...)`, `Component`/`ChatFormatting`, and the same
 op-level-to-`PermissionLevel` change as 1.21.11 but with different names:
 `Commands.hasPermission(Commands.LEVEL_ADMINS)`.
+
+## neoforge-1.21.11/ — done, builds clean
+
+A real NeoForge mod: registers on `NeoForge.EVENT_BUS` for `ServerStartedEvent`/`ServerStoppingEvent`
+(state load/save, same dedicated-scheduler batch window as Fabric — `AskProcessor` never touches
+world/player state directly, only via `NeoForgeGameBridge`), `PlayerEvent.PlayerLoggedInEvent` for
+join, and `ServerChatEvent` for chat (cancelable — same accept/cancel-on duplicate/cooldown/full
+behavior as Fabric's `ALLOW_CHAT_MESSAGE`, canceling a message that will never be answered instead
+of letting spam show in public chat). `/aicompanion reload` via `RegisterCommandsEvent` + Brigadier.
+Items are given by constructing an `ItemStack` from the vanilla registry directly, same as Fabric —
+no `/give`-command trick needed. Config is `config/aicompanion/config.yml` (same YAML shape/keys as
+Paper's and Fabric's — copy from either) parsed with a bundled snakeyaml.
+
+Built with **official Mojang mappings** (NeoForge doesn't use Yarn) + **Java 21**, via
+**ModDevGradle** (`net.neoforged.moddev`) — the NeoForge equivalent of Fabric Loom. Non-mod library
+dependencies (`ai-companion-common`, snakeyaml) are bundled via NeoForge's `jarJar` mechanism,
+NeoForge's equivalent of Loom's `include(...)`. Has its own Gradle wrapper (`./gradlew build` from
+inside `neoforge-1.21.11/`) so it doesn't depend on any pre-installed Gradle. `release.sh` builds it
+like any other module.
+
+Being Mojang-mapped rather than Yarn-mapped, this module's class/method names are the same ones
+`fabric-26.1/`'s section below documents for the same reason (`ServerPlayer`, `MinecraftServer`,
+`BuiltInRegistries`, `Component`/`ChatFormatting`) — including `net.minecraft.resources.Identifier`
+(already the name in 1.21.11, not just 26.x — cross-checked directly against the decompiled class
+via `javap`, correcting an earlier assumption that the `ResourceLocation` rename was 26.x-only) and
+the same op-level-to-`PermissionLevel` change: `.requires(Commands.hasPermission(Commands.LEVEL_ADMINS))`
+is the modern equivalent of the old "requires op level 4" check.
+
+## neoforge-26.1/, neoforge-26.2/ — done, build clean
+
+Same code, structure, and event wiring as `neoforge-1.21.11/` (see above) — `AiCompanionMod` and
+`NeoForgeGameBridge` are near-identical across all three NeoForge modules, since `AskProcessor`
+does all the real logic and the NeoForge event/command API turned out to be stable across 1.21.11 →
+26.1 → 26.2. Two real deltas *did* turn up building against the actual decompiled classes (`javap`
+against `build/moddev/artifacts/neoforge-<version>.jar` after a build, not guessed):
+
+- **Giving items:** 1.21.11 has `Inventory.placeItemBackInInventory(ItemStack)`. That method's gone
+  by 26.1 — instead it's `boolean absorbedAll = player.getInventory().add(stack); if
+  (!absorbedAll && !stack.isEmpty()) player.drop(stack, false, false);`, mirroring vanilla's own
+  `GiveCommand` (insert into inventory, drop whatever doesn't fit).
+- **Rate-limit key:** 1.21.11 needs `player.connection.getConnection().getRemoteAddress()`. By 26.1
+  the extra hop is gone — `player.connection.getRemoteAddress()` directly.
+
+Both target **Java 25** (Mojang ships Java 25 to end users starting with the 26.x line, vs. 1.21.11's
+Java 21) via NeoForge `26.1.2.99` / `26.2.0.69` respectively — no Parchment mappings configured for
+either (not published for this line yet, same Mojang-mappings gap noted below). `settings.gradle`
+adds the `org.gradle.toolchains.foojay-resolver-convention` plugin so Gradle auto-downloads a Java
+25 toolchain on demand rather than needing one pre-installed (this machine only has Java 21 on
+`PATH`, and the build worked anyway).
 
 ## forge/ — not started

@@ -1,0 +1,18 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'NeoForged'
+            url = 'https://maven.neoforged.net/releases'
+        }
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    // Mojang ships Java 25 to end users on this Minecraft version (unlike 1.21.11's Java 21) - this
+    // resolver lets Gradle auto-download a Java 25 toolchain on demand instead of requiring one
+    // pre-installed, same as NeoForgeMDKs/MDK-26.1-ModDevGradle.
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'ai-companion-neoforge-26.1'
