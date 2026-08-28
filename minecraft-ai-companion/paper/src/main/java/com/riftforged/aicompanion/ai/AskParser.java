@@ -21,7 +21,27 @@ public final class AskParser {
     private static final Pattern ARRAY_RE = Pattern.compile("\\[[\\s\\S]*]");
     private static final Pattern ITEM_ID_RE = Pattern.compile("^minecraft:[a-z0-9_]+$");
 
+    // Some reasoning-capable models ignore "plain text only" instructions and append a leaked
+    // chain-of-thought/meta section after the real answer (e.g. "Hello! ... **Reasoning and
+    // Information** - **Constraints**: ..."). The join-greeting call has no JSON structure to
+    // anchor on (unlike the ask flows, where AskParser already only extracts the "[...]" array
+    // and silently ignores anything around it), so a leaked reply used to go out to chat
+    // verbatim. Cut at the first sign of that: markdown bold (the prompt requires plain text, so
+    // any "**" is itself a leak signal) or a labeled section header.
+    private static final Pattern GREETING_LEAK_RE =
+        Pattern.compile("(?i)\\*\\*|\\b(reasoning|explanation|rationale|constraints?|notes?)\\s*:");
+
     private AskParser() {}
+
+    /** Strips a leaked reasoning/meta section off a join-greeting reply and enforces maxLen.
+     *  Returns null if nothing usable remains, so the caller falls back to the next model. */
+    public static String parseGreeting(String text, int maxLen) {
+        if (text == null || text.isEmpty()) return null;
+        Matcher m = GREETING_LEAK_RE.matcher(text);
+        String clean = (m.find() ? text.substring(0, m.start()) : text).trim();
+        if (clean.isEmpty()) return null;
+        return AiClient.sanitize(clean, maxLen);
+    }
 
     /** Returns up to maxSubparts sanitized subparts, or null if the response was unusable. */
     public static List<AskSubpart> parseSubparts(String text, int maxSubparts) {

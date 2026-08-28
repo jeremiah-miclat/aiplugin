@@ -25,6 +25,9 @@ import java.util.logging.Logger;
  */
 public final class AskProcessor {
     private static final int LOW_REMAINING_WARNING = 3;
+    // Raw-response budget for the join greeting call — see handleJoin() for why this is bigger
+    // than ChatFormat.MC_CHAT_LIMIT.
+    private static final int GREETING_RAW_MAX_LEN = 2000;
 
     private final Logger logger;
     private final YamlBotConfig config;
@@ -60,7 +63,11 @@ public final class AskProcessor {
             "choices, no \"Reasoning:\" section, no preamble or meta-commentary before or after " +
             "it. The very first character of your response must be the first character of the " +
             "greeting itself.";
-        return ai.ask(prompt, ChatFormat.MC_CHAT_LIMIT)
+        // maxLen here is a raw-response budget, not the final chat length: it just has to stay
+        // well clear of MC_CHAT_LIMIT so a model that leaks reasoning text after the real greeting
+        // isn't truncated mid-leak before parseGreeting() gets a chance to cut it off cleanly. The
+        // actual MC_CHAT_LIMIT is enforced inside parseGreeting().
+        return ai.ask(prompt, GREETING_RAW_MAX_LEN, text -> AskParser.parseGreeting(text, ChatFormat.MC_CHAT_LIMIT))
             .thenCompose(reply -> {
                 String greeting = (reply == null || reply.isEmpty()) ? messages.joinFallbackGreeting() : reply;
                 bridge.sendChat(player + ": " + greeting, config.broadcastReplies());
