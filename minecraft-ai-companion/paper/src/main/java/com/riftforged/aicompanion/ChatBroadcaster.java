@@ -2,12 +2,14 @@ package com.riftforged.aicompanion;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Ports sendChat/sendPackedReplies/packLines from watcher.js. Every caller passes a message
@@ -25,6 +27,10 @@ public final class ChatBroadcaster {
     // Fabric's GameBridge.sendChat implementation owns this instead.
     private static volatile DiscordWebhook discordWebhook = null;
     private static volatile String botName = DEFAULT_BOT_NAME;
+    private static volatile TextColor nameColor = NamedTextColor.BLUE;
+    private static volatile boolean nameBold = true;
+    private static volatile TextColor messageColor = NamedTextColor.WHITE;
+    private static volatile boolean messageBold = false;
 
     public static void configureDiscordWebhook(DiscordWebhook webhook) {
         discordWebhook = webhook;
@@ -32,6 +38,25 @@ public final class ChatBroadcaster {
 
     public static void configureBotName(String name) {
         botName = (name == null || name.isBlank()) ? DEFAULT_BOT_NAME : name;
+    }
+
+    public static void configureChatStyle(String nameColorRaw, boolean nameBoldValue,
+                                           String messageColorRaw, boolean messageBoldValue) {
+        nameColor = resolveColor(nameColorRaw, NamedTextColor.BLUE);
+        nameBold = nameBoldValue;
+        messageColor = resolveColor(messageColorRaw, NamedTextColor.WHITE);
+        messageBold = messageBoldValue;
+    }
+
+    private static TextColor resolveColor(String raw, TextColor def) {
+        if (raw == null || raw.isBlank()) return def;
+        String trimmed = raw.trim();
+        if (trimmed.startsWith("#")) {
+            TextColor hex = TextColor.fromHexString(trimmed);
+            return hex != null ? hex : def;
+        }
+        NamedTextColor named = NamedTextColor.NAMES.value(trimmed.toLowerCase(Locale.ROOT));
+        return named != null ? named : def;
     }
 
     private ChatBroadcaster() {}
@@ -88,8 +113,9 @@ public final class ChatBroadcaster {
     }
 
     private static Component formatted(String safe) {
-        return Component.text(botName, NamedTextColor.BLUE, TextDecoration.BOLD)
+        return Component.text(botName, nameColor)
+            .decoration(TextDecoration.BOLD, nameBold)
             .append(Component.text(" > ", NamedTextColor.GRAY))
-            .append(Component.text(safe, NamedTextColor.WHITE));
+            .append(Component.text(safe, messageColor).decoration(TextDecoration.BOLD, messageBold));
     }
 }

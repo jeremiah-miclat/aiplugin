@@ -101,6 +101,9 @@ public final class AiCompanionPlugin extends JavaPlugin {
         this.askProcessor = new AskProcessor(this, config, messages, kb, aiClient, memory, rateLimiter);
 
         ChatBroadcaster.configureBotName(config.botName());
+        ChatBroadcaster.configureChatStyle(
+            config.chatStyleNameColor(), config.chatStyleNameBold(),
+            config.chatStyleMessageColor(), config.chatStyleMessageBold());
         ChatBroadcaster.configureDiscordWebhook(
             new DiscordWebhook(config.discordWebhookUrl(), config.discordUsername(), getLogger()));
 

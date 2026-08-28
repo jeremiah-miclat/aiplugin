@@ -31,6 +31,10 @@ public final class YamlBotConfig implements BotSettings {
     private final boolean broadcastReplies;
     private final String discordWebhookUrl;
     private final String discordUsername;
+    private final String chatStyleNameColor;
+    private final boolean chatStyleNameBold;
+    private final String chatStyleMessageColor;
+    private final boolean chatStyleMessageBold;
 
     public YamlBotConfig(Path configFile) {
         YamlConfig cfg = new YamlConfig(configFile);
@@ -54,6 +58,10 @@ public final class YamlBotConfig implements BotSettings {
         this.broadcastReplies = cfg.getBoolean("broadcastReplies", true);
         this.discordWebhookUrl = cfg.getString("discord.webhookUrl", "");
         this.discordUsername = cfg.getString("discord.username", "");
+        this.chatStyleNameColor = cfg.getString("chatStyle.nameColor", ChatFormat.DEFAULT_NAME_COLOR);
+        this.chatStyleNameBold = cfg.getBoolean("chatStyle.nameBold", ChatFormat.DEFAULT_NAME_BOLD);
+        this.chatStyleMessageColor = cfg.getString("chatStyle.messageColor", ChatFormat.DEFAULT_MESSAGE_COLOR);
+        this.chatStyleMessageBold = cfg.getBoolean("chatStyle.messageBold", ChatFormat.DEFAULT_MESSAGE_BOLD);
     }
 
     public String botName() { return botName; }
@@ -75,4 +83,8 @@ public final class YamlBotConfig implements BotSettings {
     public boolean broadcastReplies() { return broadcastReplies; }
     public String discordWebhookUrl() { return discordWebhookUrl; }
     public String discordUsername() { return discordUsername; }
+    public String chatStyleNameColor() { return chatStyleNameColor; }
+    public boolean chatStyleNameBold() { return chatStyleNameBold; }
+    public String chatStyleMessageColor() { return chatStyleMessageColor; }
+    public boolean chatStyleMessageBold() { return chatStyleMessageBold; }
 }

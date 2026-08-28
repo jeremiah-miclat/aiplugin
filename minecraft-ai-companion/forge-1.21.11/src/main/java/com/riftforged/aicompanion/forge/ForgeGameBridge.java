@@ -7,6 +7,7 @@ import com.riftforged.aicompanion.ItemClassifier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,12 +34,35 @@ public final class ForgeGameBridge implements GameBridge {
     private final Logger logger;
     private final DiscordWebhook discordWebhook;
     private final String botName;
+    private final TextColor nameColor;
+    private final boolean nameBold;
+    private final TextColor messageColor;
+    private final boolean messageBold;
 
-    public ForgeGameBridge(Supplier<MinecraftServer> serverSupplier, Logger logger, DiscordWebhook discordWebhook, String botName) {
+    public ForgeGameBridge(Supplier<MinecraftServer> serverSupplier, Logger logger, DiscordWebhook discordWebhook,
+                            String botName, String nameColorRaw, boolean nameBold,
+                            String messageColorRaw, boolean messageBold) {
         this.serverSupplier = serverSupplier;
         this.logger = logger;
         this.discordWebhook = discordWebhook;
         this.botName = (botName == null || botName.isBlank()) ? ChatFormat.DEFAULT_BOT_NAME : botName;
+        this.nameColor = resolveColor(nameColorRaw, ChatFormatting.BLUE);
+        this.nameBold = nameBold;
+        this.messageColor = resolveColor(messageColorRaw, ChatFormatting.WHITE);
+        this.messageBold = messageBold;
+    }
+
+    private static TextColor resolveColor(String raw, ChatFormatting def) {
+        if (raw == null || raw.isBlank()) return TextColor.fromLegacyFormat(def);
+        String trimmed = raw.trim();
+        if (ChatFormat.isHexColor(trimmed)) {
+            return TextColor.fromRgb(ChatFormat.parseHexColor(trimmed));
+        }
+        try {
+            return TextColor.fromLegacyFormat(ChatFormatting.valueOf(trimmed.toUpperCase(java.util.Locale.ROOT)));
+        } catch (IllegalArgumentException e) {
+            return TextColor.fromLegacyFormat(def);
+        }
     }
 
     @Override
@@ -115,8 +139,8 @@ public final class ForgeGameBridge implements GameBridge {
     }
 
     private Component formatted(String safe) {
-        return Component.literal(botName).withStyle(s -> s.withColor(ChatFormatting.BLUE).withBold(true))
+        return Component.literal(botName).withStyle(s -> s.withColor(nameColor).withBold(nameBold))
             .append(Component.literal(" > ").withStyle(s -> s.withColor(ChatFormatting.GRAY)))
-            .append(Component.literal(safe).withStyle(s -> s.withColor(ChatFormatting.WHITE)));
+            .append(Component.literal(safe).withStyle(s -> s.withColor(messageColor).withBold(messageBold)));
     }
 }

@@ -9,6 +9,17 @@
 # The name shown in chat before every bot message (e.g. "mcAi > Cseph: ...").
 botName: "mcAi"
 
+# Chat message styling. Two segments are configurable — the bot's name, and the message body —
+# the gray " > " separator between them is always fixed and cannot be changed. Colors accept
+# either a standard Minecraft color name (black, dark_blue, dark_green, dark_aqua, dark_red,
+# dark_purple, gold, gray, dark_gray, blue, green, aqua, red, light_purple, yellow, white) or a
+# hex code like "#55AAFF". Blank or unrecognized values silently fall back to the default shown.
+chatStyle:
+  nameColor: "blue"
+  nameBold: true
+  messageColor: "white"
+  messageBold: false
+
 serverName: "My Minecraft Server"
 
 # "friendly" or "trashtalk" — see Persona.java for what each sounds like.

@@ -26,6 +26,10 @@ public final class BotConfig {
     private final boolean broadcastReplies;
     private final String discordWebhookUrl;
     private final String discordUsername;
+    private final String chatStyleNameColor;
+    private final boolean chatStyleNameBold;
+    private final String chatStyleMessageColor;
+    private final boolean chatStyleMessageBold;
 
     public BotConfig(FileConfiguration cfg) {
         this.botName = cfg.getString("botName", "mcAi");
@@ -52,6 +56,10 @@ public final class BotConfig {
         this.broadcastReplies = cfg.getBoolean("broadcastReplies", true);
         this.discordWebhookUrl = cfg.getString("discord.webhookUrl", "");
         this.discordUsername = cfg.getString("discord.username", "");
+        this.chatStyleNameColor = cfg.getString("chatStyle.nameColor", "blue");
+        this.chatStyleNameBold = cfg.getBoolean("chatStyle.nameBold", true);
+        this.chatStyleMessageColor = cfg.getString("chatStyle.messageColor", "white");
+        this.chatStyleMessageBold = cfg.getBoolean("chatStyle.messageBold", false);
     }
 
     public String botName() { return botName; }
@@ -73,4 +81,8 @@ public final class BotConfig {
     public boolean broadcastReplies() { return broadcastReplies; }
     public String discordWebhookUrl() { return discordWebhookUrl; }
     public String discordUsername() { return discordUsername; }
+    public String chatStyleNameColor() { return chatStyleNameColor; }
+    public boolean chatStyleNameBold() { return chatStyleNameBold; }
+    public String chatStyleMessageColor() { return chatStyleMessageColor; }
+    public boolean chatStyleMessageBold() { return chatStyleMessageBold; }
 }

@@ -31,12 +31,33 @@ public final class FabricGameBridge implements GameBridge {
     private final Logger logger;
     private final DiscordWebhook discordWebhook;
     private final String botName;
+    private final net.minecraft.text.TextColor nameColor;
+    private final boolean nameBold;
+    private final net.minecraft.text.TextColor messageColor;
+    private final boolean messageBold;
 
-    public FabricGameBridge(Supplier<MinecraftServer> serverSupplier, Logger logger, DiscordWebhook discordWebhook, String botName) {
+    public FabricGameBridge(Supplier<MinecraftServer> serverSupplier, Logger logger, DiscordWebhook discordWebhook,
+                             String botName, String nameColorRaw, boolean nameBold,
+                             String messageColorRaw, boolean messageBold) {
         this.serverSupplier = serverSupplier;
         this.logger = logger;
         this.discordWebhook = discordWebhook;
         this.botName = (botName == null || botName.isBlank()) ? ChatFormat.DEFAULT_BOT_NAME : botName;
+        this.nameColor = resolveColor(nameColorRaw, Formatting.BLUE);
+        this.nameBold = nameBold;
+        this.messageColor = resolveColor(messageColorRaw, Formatting.WHITE);
+        this.messageBold = messageBold;
+    }
+
+    private static net.minecraft.text.TextColor resolveColor(String raw, Formatting def) {
+        if (raw == null || raw.isBlank()) return net.minecraft.text.TextColor.fromFormatting(def);
+        String trimmed = raw.trim();
+        if (ChatFormat.isHexColor(trimmed)) {
+            return net.minecraft.text.TextColor.fromRgb(ChatFormat.parseHexColor(trimmed));
+        }
+        Formatting f = Formatting.byName(trimmed);
+        return f != null ? net.minecraft.text.TextColor.fromFormatting(f)
+                          : net.minecraft.text.TextColor.fromFormatting(def);
     }
 
     @Override
@@ -110,8 +131,8 @@ public final class FabricGameBridge implements GameBridge {
     }
 
     private Text formatted(String safe) {
-        return Text.literal(botName).styled(s -> s.withColor(Formatting.BLUE).withBold(true))
+        return Text.literal(botName).styled(s -> s.withColor(nameColor).withBold(nameBold))
             .append(Text.literal(" > ").styled(s -> s.withColor(Formatting.GRAY)))
-            .append(Text.literal(safe).styled(s -> s.withColor(Formatting.WHITE)));
+            .append(Text.literal(safe).styled(s -> s.withColor(messageColor).withBold(messageBold)));
     }
 }

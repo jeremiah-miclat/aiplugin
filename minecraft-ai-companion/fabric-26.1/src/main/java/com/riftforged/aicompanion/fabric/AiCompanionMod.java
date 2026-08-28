@@ -157,7 +157,9 @@ public final class AiCompanionMod implements ModInitializer {
         }
 
         DiscordWebhook discordWebhook = new DiscordWebhook(config.discordWebhookUrl(), config.discordUsername(), LOGGER);
-        this.bridge = new FabricGameBridge(() -> server, LOGGER, discordWebhook, config.botName());
+        this.bridge = new FabricGameBridge(() -> server, LOGGER, discordWebhook, config.botName(),
+            config.chatStyleNameColor(), config.chatStyleNameBold(),
+            config.chatStyleMessageColor(), config.chatStyleMessageBold());
 
         this.messages = new Messages(config.personality(), config);
         KnowledgeBase kb = new KnowledgeBase(CONFIG_DIR.resolve("kb"), CONFIG_DIR.resolve("server-info.md"));
