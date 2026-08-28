@@ -4,7 +4,7 @@
   "rcon": {
     "host": "127.0.0.1",
     "port": 25575,
-    "password": "Gg6iUpZN1SqMKkK"
+    "password": "CHANGE_ME"
   },
   "serverName": "RF-TestServer",
   "personality": "trashtalk",
@@ -16,7 +16,7 @@
   "maxGiveQuantity": 64,
   "maxEquipmentQuantity": 1,
   "openRouter": {
-    "apiKey": "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",
+    "apiKey": "CHANGE_ME",
     "models": [
       "nvidia/nemotron-3-ultra-550b-a55b:free",
       "z-ai/glm-5.2:free",

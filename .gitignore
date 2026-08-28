@@ -16,3 +16,18 @@
 
 # Personal Claude Code permission overrides, not shared with the team
 .claude/settings.local.json
+
+# Empty auto-generated VS Code stubs from NeoForge/Fabric Gradle IDE integration
+**/.vscode/
+
+# Fabric server launch artifacts, sometimes generated at repo root instead of a run/ dir
+/fabric-server-launch.jar
+/libraries/
+
+# Node dependencies — regenerate with npm install
+node_modules/
+
+# ai-bot-openrouter local secrets and runtime state — see config.example.json for the template
+ai-bot-openrouter/config.json
+ai-bot-openrouter/ai-bot.log
+ai-bot-openrouter/state.json
