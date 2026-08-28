@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#160b2b"/>
+      <stop offset="100%" stop-color="#2a1450"/>
+    </linearGradient>
+    <linearGradient id="accent2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7c5cff"/>
+      <stop offset="100%" stop-color="#33d6c0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#bg2)"/>
+
+  <text x="120" y="150" font-size="72" font-weight="700" fill="#ffffff">Supported platforms</text>
+  <rect x="122" y="172" width="380" height="8" fill="url(#accent2)"/>
+  <text x="120" y="215" font-size="30" fill="#c9bfe8">Every platform ships the same features and the same config.yml shape</text>
+
+  <!-- table -->
+  <g font-size="30">
+    <!-- header row -->
+    <text x="480" y="300" fill="#8f7fc0" font-weight="600">1.21.11</text>
+    <text x="760" y="300" fill="#8f7fc0" font-weight="600">26.1</text>
+    <text x="1020" y="300" fill="#8f7fc0" font-weight="600">26.2</text>
+
+    <line x1="120" y1="330" x2="1800" y2="330" stroke="#4a2d7a" stroke-width="2"/>
+
+    <!-- Paper -->
+    <text x="120" y="400" fill="#ffffff" font-weight="600">Paper</text>
+    <text x="480" y="400" fill="#33d6c0">one jar covers all versions</text>
+
+    <line x1="120" y1="440" x2="1800" y2="440" stroke="#2f1d55" stroke-width="1"/>
+
+    <!-- Fabric -->
+    <text x="120" y="510" fill="#ffffff" font-weight="600">Fabric</text>
+    <circle cx="500" cy="500" r="14" fill="#33d6c0"/>
+    <circle cx="780" cy="500" r="14" fill="#33d6c0"/>
+    <circle cx="1040" cy="500" r="14" fill="#33d6c0"/>
+
+    <line x1="120" y1="550" x2="1800" y2="550" stroke="#2f1d55" stroke-width="1"/>
+
+    <!-- Forge -->
+    <text x="120" y="620" fill="#ffffff" font-weight="600">Forge</text>
+    <circle cx="500" cy="610" r="14" fill="#33d6c0"/>
+    <circle cx="780" cy="610" r="14" fill="#33d6c0"/>
+    <circle cx="1040" cy="610" r="14" fill="#33d6c0"/>
+
+    <line x1="120" y1="660" x2="1800" y2="660" stroke="#2f1d55" stroke-width="1"/>
+
+    <!-- NeoForge -->
+    <text x="120" y="730" fill="#ffffff" font-weight="600">NeoForge</text>
+    <circle cx="500" cy="720" r="14" fill="#33d6c0"/>
+    <circle cx="780" cy="720" r="14" fill="#33d6c0"/>
+    <circle cx="1040" cy="720" r="14" fill="#33d6c0"/>
+  </g>
+
+  <text x="120" y="900" font-size="26" fill="#c9bfe8">Same config.yml keys everywhere — copy one platform's config to another and it just works.</text>
+  <text x="120" y="940" font-size="26" fill="#c9bfe8">Pick your loader and Minecraft version, drop the jar in, and go.</text>
+
+  <text x="120" y="1010" font-size="24" fill="#6f5f99">MIT licensed  ·  server-agnostic by design  ·  free-tier AI key required</text>
+</svg>
