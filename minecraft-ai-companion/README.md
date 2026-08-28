@@ -2,7 +2,7 @@
 
 Port of `ai-bot-openrouter/watcher.js` (a Node.js sidecar that tailed the PaperMC log and used
 RCON) into native server plugins/mods. Build order: **Paper** (done) → **Fabric** (1.21.11 done,
-26.1 blocked — see below) → Forge/NeoForge (not started).
+26.1 blocked — see below) → **Forge** (1.21.11 done) → NeoForge (not started).
 
 **Server-agnostic by design:** the original `watcher.js` shipped with one specific server's
 lore/rules baked into its KB file. Nothing here is patterned to any particular server — every bit
@@ -10,15 +10,15 @@ of server-specific content (name, rules, commands, lore, item lists, whatever) i
 config, and every default that ships in the jar is a generic, empty-ish template meant to be
 replaced, not real content for a real server.
 
-## common/ — shared logic, used by the Fabric modules
+## common/ — shared logic, used by the Fabric and Forge modules
 
-Plain Java, zero Minecraft/Bukkit/Fabric imports (verified by grep, not just by design): the AI
-provider client, KB chunk search, rate limiting, conversation memory, ask-queue batching, YAML
+Plain Java, zero Minecraft/Bukkit/Fabric/Forge imports (verified by grep, not just by design): the
+AI provider client, KB chunk search, rate limiting, conversation memory, ask-queue batching, YAML
 config loading, and the full `AskProcessor` orchestration (prompt construction, parsing, the
 whole join/ask flow) — abstracted from any specific platform via a small `GameBridge` interface
-(give an item, send a chat line, resolve a rate-limit key) that each Fabric MC-version module
-implements once in its own mapped API. Built with Maven, installed to the local repo (`mvn
-install`) so Gradle-based Fabric modules can depend on it via `mavenLocal()`.
+(give an item, send a chat line, resolve a rate-limit key) that each Gradle module implements once
+in its own mapped API. Built with Maven, installed to the local repo (`mvn install`) so
+Gradle-based Fabric/Forge modules can depend on it via `mavenLocal()`.
 
 Deliberately **not** wired into `paper/`, which still carries its own copies of these same
 classes — `paper/` was already built and released before this module existed; retrofitting a
@@ -180,4 +180,44 @@ Mojang mappings use `ServerPlayer`/`MinecraftServer` (not Yarn's `ServerPlayerEn
 op-level-to-`PermissionLevel` change as 1.21.11 but with different names:
 `Commands.hasPermission(Commands.LEVEL_ADMINS)`.
 
-## forge/ — not started
+## forge-1.21.11/ — done, builds clean
+
+A real Forge mod: `PlayerEvent.PlayerLoggedInEvent`/`ServerChatEvent` for join/chat (the latter
+*cancels* the chat event — the inverse of Fabric's `ALLOW_CHAT_MESSAGE`, which instead returns
+`true` to let a message through — for a message that will never be answered — duplicate/cooldown/
+full — same anti-spam behavior as Paper/Fabric), items given by constructing an `ItemStack` from
+the vanilla registry directly and inserting it into the player's inventory (mirrors vanilla's own
+GiveCommand — drop whatever doesn't fit), `/aicompanion reload` via Brigadier. Config is
+`config/aicompanion/config.yml` (same YAML shape/keys as Paper/Fabric's `config.yml` — copy one to
+the other) parsed with the same bundled snakeyaml as the Fabric modules.
+
+Built with **official Mojang mappings** (ForgeGradle resolves these itself — no separate mappings
+project the way Fabric needs Yarn) + **Java 21**, against **Forge 1.21.11-61.2.0** via
+ForgeGradle 7. Has its own Gradle wrapper (`./gradlew build` from inside `forge-1.21.11/`).
+`release.sh` builds it like any other module.
+
+**Bundling common/snakeyaml:** unlike the Fabric modules (which use Loom's built-in Jar-in-Jar),
+this module uses the `com.gradleup.shadow` plugin against a dedicated `shade` Gradle configuration
+(not the full runtime classpath — that would shade the whole of Minecraft/Forge into the jar) —
+Forge's own Jar-in-Jar mechanism is meant for mod-to-mod dependencies with version ranges, not
+plain libraries. Gson is excluded from that `shade` configuration for the same reason the Fabric
+modules keep it `compileOnly`: Minecraft already bundles Gson on the runtime classpath.
+
+Real API surprises worth knowing if you touch this code (all confirmed directly against the real,
+official-mapped Forge 1.21.11-61.2.0 classes via `javap`, not assumed):
+- **`ResourceLocation` is already renamed to `Identifier`** as of this build (`1.21.11-61.2.0`,
+  August 2026) — contrary to what the `fabric-26.1/` section below says about the rename being
+  26.x-only; that note was accurate for an earlier `1.21.11` patch's mapping data, evidently not
+  this one.
+- **Every Forge event type is its own static `EventBus<T>`** (`SomeEvent.BUS.addListener(...)`),
+  not a single shared `MinecraftForge.EVENT_BUS` — a bigger eventbus rework than just the
+  op-level/`PermissionCheck` rename both Fabric modules already document. Mod-lifecycle events
+  (`FMLCommonSetupEvent` etc.) are the one exception, needing a mod-scoped `BusGroup` via
+  `SomeEvent.getBus(modBusGroup)` instead, since those fire once per mod rather than once globally
+  — not used here, since this mod does all its registration directly in the `AiCompanionMod`
+  constructor rather than deferring to a setup event.
+- `ServerChatEvent.BUS.addListener(Predicate<ServerChatEvent>)` — returning `true` **cancels**
+  (suppresses) the event, the opposite sense of Fabric's `ALLOW_CHAT_MESSAGE`.
+- `com.mojang.authlib.GameProfile` is a record now — `.name()`, not `.getName()`.
+- `Player.drop(ItemStack, boolean)` is two-arg here (not three, unlike the `fabric-26.1/` draft's
+  assumption for a later MC version) — mirrors vanilla's `GiveCommand` drop-what-doesn't-fit path.

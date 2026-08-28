@@ -9,3 +9,6 @@
 # paper/target/, which was already committed before this file existed; it only stops NEW Maven
 # modules from being tracked the same way.
 **/target/
+
+# Personal Claude Code permission overrides, not shared with the team
+.claude/settings.local.json
