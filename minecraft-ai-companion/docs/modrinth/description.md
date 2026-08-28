@@ -4,8 +4,10 @@ Paste everything below the `---` into Modrinth's Description field (it renders m
 single blob now includes the full setup guide and the Groq API key guide inline — Modrinth only
 takes one paste, so there's no separate "Full Guide" section to fill in.
 
-Every heading below is capped at two words (plus an optional step number/emoji) on purpose — this
-gets pasted into Modrinth's description field, where shorter headings read better.
+Every heading below is capped at two words, full stop — no step numbers, no emoji, nothing else in
+the heading text itself. Modrinth's own publishing checklist flags anything longer as "too long,"
+counting on whitespace, so a heading like "2. API key" (3 tokens) trips it even though it reads as
+two words to a person. Keep it strictly two words if you edit this file.
 
 ---
 
@@ -16,7 +18,7 @@ made-up answers. It can optionally hand out items too, with limits you control.
 Nothing about it is pre-loaded with any particular server's content — every default ships as an
 empty-ish template meant to be replaced. You write what it knows; it just answers in your voice.
 
-## ⚠️ Free key
+## Free key
 
 This plugin/mod needs an API key from an AI provider to work (Groq by default — a real permanent
 free tier, no credit card). **Only ever use a free-tier account with no payment method attached.**
@@ -97,7 +99,7 @@ Full configuration reference, every option explained: **see "Setup guide" below*
 Everything you need to install, configure, and run AI Companion on any of the four supported
 platforms.
 
-### 1. Install
+### Install
 
 | Platform | Where the jar goes | Files generated on first start |
 |---|---|---|
@@ -110,7 +112,7 @@ Pick the jar matching your loader **and** Minecraft version (1.21.11, 26.1, or 2
 one jar that covers all of them). Start the server once to generate the files above, then it won't
 answer anything useful until you fill in two of them: an API key, and your own server info.
 
-### 2. API key
+### API key
 
 **Use a free-tier account with no payment method attached — not a paid one.** This project's
 config keeps `apiKey` as plain text in `config.yml` on your server's own filesystem; a free key
@@ -144,7 +146,7 @@ questions, item-give cooldowns, and conversation history all survive a reload �
 `aicompanion.reload`, default op, alias `/aic`; Fabric/Forge/NeoForge: vanilla permission level 4,
 same as `/op`).
 
-### 3. Server info
+### Server info
 
 Nothing ships pre-loaded with any particular server's content — every default is a template meant
 to be replaced.
@@ -159,7 +161,7 @@ to be replaced.
 
 Both are re-read live on every question — no reload needed for these two.
 
-### 4. Item giving
+### Item giving
 
 ```yaml
 itemGiving:
@@ -173,7 +175,7 @@ Turning `enabled: false` doesn't just stop gives from happening — the AI is to
 one, and if it ignores that, the plugin overrides its reply with a plain "item giving is off here"
 message instead of letting a promised-but-undelivered item slip through.
 
-### 5. Other tunables
+### Other tunables
 
 | Key | What it does |
 |---|---|
@@ -190,7 +192,7 @@ message instead of letting a promised-but-undelivered item slip through.
 Every key in this table (and item-giving's, above) can also be changed from chat — see
 "Admin commands" below.
 
-### 6. Discord relay
+### Discord relay
 
 Every bot chat line (join greetings, `!ai` replies) can be relayed into a Discord channel via an
 incoming webhook — no bridge plugin needed, off by default:
@@ -208,7 +210,7 @@ incoming webhook — no bridge plugin needed, off by default:
 Leave `webhookUrl` blank (the default) to keep this off. A relay failure (bad URL, Discord down,
 rate-limited) is logged and dropped; it never affects the in-game reply that triggered it.
 
-### 7. Admin commands
+### Admin commands
 
 Most of `config.yml` can be changed from in-game chat instead of hand-editing the file:
 
@@ -221,11 +223,11 @@ Most of `config.yml` can be changed from in-game chat instead of hand-editing th
 Every `set`/`add`/`remove` above reloads automatically — no separate `/aicompanion reload` needed.
 `ai.apiKey` is the one exception: it's never viewable or settable via command (a secret shouldn't
 be echoed into chat or server logs), so that field alone still needs a direct edit to `config.yml`.
-Same permission as `reload` (see "2. API key" above).
+Same permission as `reload` (see "API key" above).
 
 ### Security notes
 
-- Use a **free-tier** API key and Discord webhook — see "⚠️ Free key" above for why.
+- Use a **free-tier** API key and Discord webhook — see "Free key" above for why.
 - Never commit `config.yml` with a real key in it anywhere, and never hand out a jar/config with
   your key baked in — every install needs its own.
 - If a key ever ends up somewhere it shouldn't (pasted in chat, committed to a public repo, etc.),
@@ -236,7 +238,7 @@ Same permission as `reload` (see "2. API key" above).
 Groq is the default AI provider this project ships pointed at, and it has a genuine permanent
 free tier — no credit card required to sign up or to generate a key.
 
-### ⚠️ Free tier
+### Free tier
 
 Your API key lives in a plaintext config file (`config.yml`) on whatever machine runs your
 Minecraft server. If that hosting is ever compromised, shared with other tenants, or accessible
