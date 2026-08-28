@@ -1,10 +1,10 @@
 # AI Companion — multi-platform plan
 
 Port of `ai-bot-openrouter/watcher.js` (a Node.js sidecar that tailed the PaperMC log and used
-RCON) into native server plugins/mods. Build order: **Paper** (done) → **Fabric** (1.21.11, 26.1
-done) → **Forge** (1.21.11, 26.1, 26.2 done) → **NeoForge** (1.21.11, 26.1, 26.2 done). Every
-platform is now covered; see the `fabric-26.1/` section below for why the 26.x line looked blocked
-at first and wasn't.
+RCON) into native server plugins/mods. Build order: **Paper** (done) → **Fabric** (1.21.11, 26.1,
+26.2 done) → **Forge** (1.21.11, 26.1, 26.2 done) → **NeoForge** (1.21.11, 26.1, 26.2 done). Every
+platform now covers every targeted Minecraft version; see the `fabric-26.1/` section below for why
+the 26.x line looked blocked at first and wasn't.
 
 **Server-agnostic by design:** the original `watcher.js` shipped with one specific server's
 lore/rules baked into its KB file. Nothing here is patterned to any particular server — every bit
@@ -46,8 +46,12 @@ old server, and Java 25 bytecode can't load on 1.21.11's Java 21 JVM at all). If
 **Build (one platform, for iterating):**
 ```
 cd paper
-mvn package
+./mvnw package
 ```
+Has its own Maven wrapper (like the Gradle modules have their own Gradle wrapper), so it
+self-provisions Maven — no pre-installed `mvn` needed on the machine running this or `release.sh`.
+Plain `mvn package` still works if you do have Maven installed.
+
 Output: `paper/target/ai-companion-paper-<version>.jar` (shaded, Gson bundled/relocated) — but
 `target/` is Maven build output, wiped/regenerated on every build, so it's not where a jar you
 mean to keep should live. See **Releases** below for that.
@@ -89,6 +93,8 @@ releases/
         ai-companion-fabric-1.0.0.jar
       26.1/
         ai-companion-fabric-1.0.0.jar
+      26.2/
+        ai-companion-fabric-1.0.0.jar
     forge/
       1.21.11/
         ai-companion-forge-1.0.0.jar
@@ -125,12 +131,13 @@ Modules can be at different versions independently (a Paper-only bugfix release 
 bump Fabric/Forge) — `release.sh` reads each module's own version, so it files into whichever
 version folder is actually its own.
 
-Both Maven modules (Paper) and Gradle/Loom modules (Fabric) build automatically — `release.sh`
-detects which build tool a module uses and drives it accordingly. A Gradle module needs its own
-wrapper (`./gradlew`) generated before `release.sh` will touch it (`gradle wrapper
---gradle-version <ver>` run once inside that module) — if a module can't configure successfully
-yet, it can't generate a wrapper either, so `release.sh` just skips it with a reminder instead of
-guessing.
+Both Maven modules (Paper) and Gradle/Loom modules (Fabric/Forge/NeoForge) build automatically —
+`release.sh` detects which build tool a module uses and drives it accordingly, preferring each
+module's own wrapper (`./mvnw` for Paper, `./gradlew` for the rest) over a system-wide install so
+the whole pipeline runs on a machine with nothing but a JDK on it. A Gradle module needs its own
+wrapper generated before `release.sh` will touch it (`gradle wrapper --gradle-version <ver>` run
+once inside that module) — if a module can't configure successfully yet, it can't generate a
+wrapper either, so `release.sh` just skips it with a reminder instead of guessing.
 
 `releases/` is build output like `target/`/`build/` — regeneratable from source at any time — so
 if this project ever moves into git, all three belong in `.gitignore` rather than being committed;
@@ -212,6 +219,26 @@ client/server jars for this version line, so a mapping file would be a no-op. Fo
 handles that gracefully (its build log shows a `srg2names[...][Empty]` step and just proceeds); the
 old Fabric Loom plugin id's mapping-resolution code doesn't have that fallback and just throws.
 </details>
+
+## fabric-26.2/ — done, builds clean
+
+Same source as `fabric-26.1/` — `AiCompanionMod.java`/`FabricGameBridge.java` are byte-for-byte
+copies, zero source changes needed to compile against the real 26.2 artifacts (`./gradlew build`
+verified, not assumed) — same story as `forge-26.1/`→`forge-26.2/` and `neoforge-26.1/`→
+`neoforge-26.2/`: the event/mapping API held stable across the dot version, only build
+configuration differs.
+
+What differs, purely in `gradle.properties`/`fabric.mod.json`:
+- `minecraft_version=26.2` (was `26.1.2`).
+- `fabric_version=0.158.0+26.2`, pinned against `FabricMC/fabric-example-mod`'s own `26.2` branch
+  at scaffolding time — re-check there before bumping, don't guess (same rule as `fabric-26.1/`).
+- `loader_version`/`loom_version` unchanged from `fabric-26.1/` (`0.19.3` / `1.17-SNAPSHOT`) — the
+  reference branch hadn't moved either at the time this was scaffolded.
+- `fabric.mod.json`'s `minecraft` depend is `"26.2"`.
+
+Still Java 25, still no Yarn/mappings block (Minecraft has shipped unobfuscated since 26.1 — see
+the `fabric-26.1/` section above), still needs `org.gradle.configuration-cache=false` for the same
+Loom-version reason.
 
 ## forge-1.21.11/ — done, builds clean
 

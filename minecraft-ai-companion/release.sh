@@ -44,9 +44,11 @@ build_module() {
   local jar="" version=""
 
   if [ -f "$module_dir/pom.xml" ]; then
-    echo "== building $name (Maven) =="
-    (cd "$module_dir" && mvn -q -B package)
-    version="$(cd "$module_dir" && mvn -q -B help:evaluate -Dexpression=project.version -DforceStdout)"
+    local mvn_cmd=mvn
+    [ -x "$module_dir/mvnw" ] && mvn_cmd=./mvnw
+    echo "== building $name (Maven, via $mvn_cmd) =="
+    (cd "$module_dir" && "$mvn_cmd" -q -B package)
+    version="$(cd "$module_dir" && "$mvn_cmd" -q -B help:evaluate -Dexpression=project.version -DforceStdout)"
     # The shade plugin leaves 3 jars in target/: the real shaded one (plain "<artifact>-<version>.jar"),
     # a duplicate "-shaded.jar", and the pre-shade "original-*.jar" — only the first ships.
     for candidate in "$module_dir"/target/*.jar; do
