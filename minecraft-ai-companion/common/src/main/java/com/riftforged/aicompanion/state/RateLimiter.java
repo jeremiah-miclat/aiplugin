@@ -32,11 +32,17 @@ public final class RateLimiter {
 
     public synchronized Map<String, List<Long>> snapshot() {
         long now = System.currentTimeMillis();
+        // Also prunes requestLog itself, not just the returned copy — otherwise a key whose
+        // window has fully expired (player/IP never seen again) sits in memory forever, since
+        // tryConsume() only trims a key's own list on its next call and a key that's gone for
+        // good never gets one.
+        requestLog.entrySet().removeIf(entry -> {
+            entry.getValue().removeIf(t -> now - t >= WINDOW_MS);
+            return entry.getValue().isEmpty();
+        });
         Map<String, List<Long>> out = new HashMap<>();
         for (var entry : requestLog.entrySet()) {
-            List<Long> live = new ArrayList<>(entry.getValue());
-            live.removeIf(t -> now - t >= WINDOW_MS);
-            if (!live.isEmpty()) out.put(entry.getKey(), live);
+            out.put(entry.getKey(), new ArrayList<>(entry.getValue()));
         }
         return out;
     }

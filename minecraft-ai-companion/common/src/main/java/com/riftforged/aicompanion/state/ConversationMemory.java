@@ -3,7 +3,7 @@ package com.riftforged.aicompanion.state;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,11 +16,22 @@ public final class ConversationMemory {
     private static final int CONVERSATION_TURNS = 10;
     private static final int GLOBAL_HISTORY_SIZE = 100;
     private static final int GLOBAL_CONTEXT_WINDOW = 12;
+    // Caps how many distinct players' histories are kept at once — without this, perPlayer grows
+    // one entry per distinct player name ever seen for the life of the process (there's no quit
+    // hook pruning it), which is a slow unbounded leak on a long-uptime server with many players.
+    private static final int MAX_TRACKED_PLAYERS = 500;
 
     public record Turn(String question, String reply) {}
     public record GlobalTurn(String player, String question, String reply) {}
 
-    private final Map<String, Deque<Turn>> perPlayer = new HashMap<>();
+    // Access-order + removeEldestEntry evicts the least-recently-active player once the cap is
+    // hit, so players currently chatting never lose history — only ones who've been quiet longest.
+    private final Map<String, Deque<Turn>> perPlayer = new LinkedHashMap<>(16, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, Deque<Turn>> eldest) {
+            return size() > MAX_TRACKED_PLAYERS;
+        }
+    };
     private final Deque<GlobalTurn> global = new ArrayDeque<>();
 
     public synchronized List<Turn> getHistory(String player) {

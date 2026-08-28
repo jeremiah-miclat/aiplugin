@@ -71,7 +71,12 @@ public final class AiClient {
     }
 
     public void shutdown() {
-        serialExecutor.shutdownNow();
+        // Graceful, not shutdownNow(): a reload (or server stop) can land while a request is
+        // mid-flight on the single worker thread — shutdownNow() would interrupt the blocking
+        // HTTP call and silently drop that player's reply. shutdown() just stops accepting new
+        // work on this (now-replaced) client and lets whatever's in flight finish normally; the
+        // worker thread is a daemon, so it never blocks JVM/plugin shutdown either way.
+        serialExecutor.shutdown();
     }
 
     /** Identity parse: any non-empty text is accepted (used for the join greeting). */

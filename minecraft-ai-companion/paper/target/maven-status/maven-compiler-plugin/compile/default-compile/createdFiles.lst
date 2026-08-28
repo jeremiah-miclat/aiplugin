@@ -19,6 +19,7 @@ com\riftforged\aicompanion\AiCompanionPlugin.class
 com\riftforged\aicompanion\listeners\AskListener.class
 com\riftforged\aicompanion\Persona.class
 com\riftforged\aicompanion\ai\AskSubpart.class
+com\riftforged\aicompanion\state\ConversationMemory$1.class
 com\riftforged\aicompanion\ai\AiClient.class
 com\riftforged\aicompanion\state\ConversationMemory.class
 com\riftforged\aicompanion\DiscordWebhook.class
