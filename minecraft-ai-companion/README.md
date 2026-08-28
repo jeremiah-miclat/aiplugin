@@ -2,7 +2,9 @@
 
 Port of `ai-bot-openrouter/watcher.js` (a Node.js sidecar that tailed the PaperMC log and used
 RCON) into native server plugins/mods. Build order: **Paper** (done) → **Fabric** (1.21.11, 26.1
-done) → **Forge** (1.21.11, 26.1, 26.2 all done) → NeoForge (not started).
+done) → **Forge** (1.21.11, 26.1, 26.2 done) → **NeoForge** (1.21.11, 26.1, 26.2 done). Every
+platform is now covered; see the `fabric-26.1/` section below for why the 26.x line looked blocked
+at first and wasn't.
 
 **Server-agnostic by design:** the original `watcher.js` shipped with one specific server's
 lore/rules baked into its KB file. Nothing here is patterned to any particular server — every bit
@@ -10,15 +12,15 @@ of server-specific content (name, rules, commands, lore, item lists, whatever) i
 config, and every default that ships in the jar is a generic, empty-ish template meant to be
 replaced, not real content for a real server.
 
-## common/ — shared logic, used by the Fabric and Forge modules
+## common/ — shared logic, used by the Fabric, Forge, and NeoForge modules
 
-Plain Java, zero Minecraft/Bukkit/Fabric/Forge imports (verified by grep, not just by design): the
-AI provider client, KB chunk search, rate limiting, conversation memory, ask-queue batching, YAML
-config loading, and the full `AskProcessor` orchestration (prompt construction, parsing, the
-whole join/ask flow) — abstracted from any specific platform via a small `GameBridge` interface
-(give an item, send a chat line, resolve a rate-limit key) that each Gradle module implements once
-in its own mapped API. Built with Maven, installed to the local repo (`mvn install`) so
-Gradle-based Fabric/Forge modules can depend on it via `mavenLocal()`.
+Plain Java, zero Minecraft/Bukkit/Fabric/Forge/NeoForge imports (verified by grep, not just by
+design): the AI provider client, KB chunk search, rate limiting, conversation memory, ask-queue
+batching, YAML config loading, and the full `AskProcessor` orchestration (prompt construction,
+parsing, the whole join/ask flow) — abstracted from any specific platform via a small `GameBridge`
+interface (give an item, send a chat line, resolve a rate-limit key) that each Gradle module
+implements once in its own mapped API. Built with Maven, installed to the local repo (`mvn
+install`) so the Gradle-based Fabric/Forge/NeoForge modules can depend on it via `mavenLocal()`.
 
 Deliberately **not** wired into `paper/`, which still carries its own copies of these same
 classes — `paper/` was already built and released before this module existed; retrofitting a
@@ -85,18 +87,27 @@ releases/
     fabric/
       1.21.11/
         ai-companion-fabric-1.0.0.jar
-      26.1/                                    <- once fabric-26.1's build is unblocked
+      26.1/
         ai-companion-fabric-1.0.0.jar
     forge/
       1.21.11/
-        ...
+        ai-companion-forge-1.0.0.jar
       26.1/
-        ...
+        ai-companion-forge-1.0.0.jar
+      26.2/
+        ai-companion-forge-1.0.0.jar
+    neoforge/
+      1.21.11/
+        ai-companion-neoforge-1.0.0.jar
+      26.1/
+        ai-companion-neoforge-1.0.0.jar
+      26.2/
+        ai-companion-neoforge-1.0.0.jar
 ```
 
 **Module naming convention `release.sh` reads to build this automatically:**
 - `paper` — no MC-version suffix, one jar, filed straight under `<platform>/`.
-- `fabric-1.21.11`, `fabric-26.1`, `forge-26.1`, etc. — `<platform>-<mc-version>`, each its own
+- `fabric-1.21.11`, `fabric-26.1`, `forge-26.1`, `neoforge-26.2`, etc. — `<platform>-<mc-version>`, each its own
   complete module (own `pom.xml`/`build.gradle`), filed under `<platform>/<mc-version>/`. Add a
   new module directory per Minecraft version you want to support; the script picks it up with no
   other configuration.
@@ -118,8 +129,8 @@ Both Maven modules (Paper) and Gradle/Loom modules (Fabric) build automatically 
 detects which build tool a module uses and drives it accordingly. A Gradle module needs its own
 wrapper (`./gradlew`) generated before `release.sh` will touch it (`gradle wrapper
 --gradle-version <ver>` run once inside that module) — if a module can't configure successfully
-yet (see `fabric-26.1/` above), it can't generate a wrapper either, so `release.sh` just skips it
-with a reminder instead of guessing.
+yet, it can't generate a wrapper either, so `release.sh` just skips it with a reminder instead of
+guessing.
 
 `releases/` is build output like `target/`/`build/` — regeneratable from source at any time — so
 if this project ever moves into git, all three belong in `.gitignore` rather than being committed;
@@ -277,3 +288,59 @@ two modules shows that directly: a `srg2names[official-26.2][Empty]` step with n
 mapping-file download at all, and it just proceeds. That's also exactly why `fabric-26.1/` needed a
 different Fabric Loom *plugin id* (`net.fabricmc.fabric-loom`, not a newer version of the old
 `fabric-loom`) rather than any change on the Forge side — see that section for the fix.
+
+## neoforge-1.21.11/ — done, builds clean
+
+A real NeoForge mod: registers on `NeoForge.EVENT_BUS` for `ServerStartedEvent`/`ServerStoppingEvent`
+(state load/save, same dedicated-scheduler batch window as Fabric — `AskProcessor` never touches
+world/player state directly, only via `NeoForgeGameBridge`), `PlayerEvent.PlayerLoggedInEvent` for
+join, and `ServerChatEvent` for chat (cancelable — same accept/cancel-on duplicate/cooldown/full
+behavior as Fabric's `ALLOW_CHAT_MESSAGE`, canceling a message that will never be answered instead
+of letting spam show in public chat). `/aicompanion reload` via `RegisterCommandsEvent` + Brigadier.
+Items are given by constructing an `ItemStack` from the vanilla registry directly, same as Fabric —
+no `/give`-command trick needed. Config is `config/aicompanion/config.yml` (same YAML shape/keys as
+Paper's and Fabric's — copy from either) parsed with a bundled snakeyaml.
+
+Built with **official Mojang mappings** (NeoForge doesn't use Yarn) + **Java 21**, via
+**ModDevGradle** (`net.neoforged.moddev`) — the NeoForge equivalent of Fabric Loom. Non-mod library
+dependencies (`ai-companion-common`, snakeyaml) are bundled via NeoForge's `jarJar` mechanism,
+NeoForge's equivalent of Loom's `include(...)`. Has its own Gradle wrapper (`./gradlew build` from
+inside `neoforge-1.21.11/`) so it doesn't depend on any pre-installed Gradle. `release.sh` builds it
+like any other module.
+
+Being Mojang-mapped rather than Yarn-mapped, this module's class/method names match what
+`forge-1.21.11/`'s section above documents in detail (`ServerPlayer`, `MinecraftServer`,
+`Identifier`, `BuiltInRegistries`, `Component`/`ChatFormatting`) — same underlying Mojang mapping
+data, different loader — including the same op-level-to-`PermissionLevel` change:
+`.requires(Commands.hasPermission(Commands.LEVEL_ADMINS))` is the modern equivalent of the old
+"requires op level 4" check.
+
+One real, verified divergence from Forge, though: NeoForge kept a single shared `NeoForge.EVENT_BUS`
+for game events — `ServerStartedEvent`/`ServerStoppingEvent`/`PlayerLoggedInEvent`/`ServerChatEvent`/
+`RegisterCommandsEvent` all register via `NeoForge.EVENT_BUS.addListener(...)` — unlike Forge's
+per-event-type static `EventBus<T>` model documented above. Confirmed by this module's own
+successful build, not assumed from the two projects' shared lineage.
+
+## neoforge-26.1/, neoforge-26.2/ — done, build clean
+
+Same code, structure, and event wiring as `neoforge-1.21.11/` (see above) — `AiCompanionMod` and
+`NeoForgeGameBridge` are near-identical across all three NeoForge modules, since `AskProcessor`
+does all the real logic and the NeoForge event/command API turned out to be stable across 1.21.11 →
+26.1 → 26.2. Two real deltas *did* turn up building against the actual decompiled classes (`javap`
+against `build/moddev/artifacts/neoforge-<version>.jar` after a build, not guessed):
+
+- **Giving items:** 1.21.11 has `Inventory.placeItemBackInInventory(ItemStack)`. That method's gone
+  by 26.1 — instead it's `boolean absorbedAll = player.getInventory().add(stack); if
+  (!absorbedAll && !stack.isEmpty()) player.drop(stack, false, false);`, mirroring vanilla's own
+  `GiveCommand` (insert into inventory, drop whatever doesn't fit).
+- **Rate-limit key:** 1.21.11 needs `player.connection.getConnection().getRemoteAddress()`. By 26.1
+  the extra hop is gone — `player.connection.getRemoteAddress()` directly.
+
+Both target **Java 25** (Mojang ships Java 25 to end users starting with the 26.x line, vs. 1.21.11's
+Java 21) via NeoForge `26.1.2.99` / `26.2.0.69` respectively — no Parchment mappings configured for
+either (not published for this line yet; per the `fabric-26.1/` section above, 26.x ships genuinely
+unobfuscated, so there may simply be less for Parchment's parameter-name layer to add on top of
+Mojang's own names — not investigated further since it isn't blocking anything here).
+`settings.gradle` adds the `org.gradle.toolchains.foojay-resolver-convention` plugin so Gradle
+auto-downloads a Java 25 toolchain on demand rather than needing one pre-installed (this machine
+only has Java 21 on `PATH`, and the build worked anyway).

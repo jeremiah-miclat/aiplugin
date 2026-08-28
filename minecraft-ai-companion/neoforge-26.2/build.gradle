@@ -1,0 +1,53 @@
+plugins {
+    id 'net.neoforged.moddev' version '2.0.144'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    // ai-companion-common is installed here via `mvn install` in ../common (see README.md).
+    mavenLocal()
+}
+
+// Mojang ships Java 25 to end users on this Minecraft version, so mods should target Java 25.
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+neoForge {
+    version = project.neo_version
+
+    mods {
+        "${project.mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+dependencies {
+    // Bundled into the final jar via NeoForge's jarJar mechanism (the `jarJar(...)` wrapper below)
+    // rather than a shade/shadow plugin - that's the idiomatic NeoForge mechanism for embedding
+    // non-mod library dependencies, same role as Loom's `include(...)` on the Fabric modules.
+    jarJar(implementation("com.riftforged:ai-companion-common:1.0.0"))
+    // Minecraft itself already bundles Gson on the runtime classpath, so it's a compile-only
+    // dependency here - NOT included, to avoid a duplicate/conflicting copy at runtime.
+    compileOnly "com.google.code.gson:gson:2.11.0"
+    // Not bundled with Minecraft, unlike Gson - has to be included for config.yml parsing.
+    jarJar(implementation("org.yaml:snakeyaml:2.2"))
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+}
+
+processResources {
+    inputs.property "version", project.version
+    filteringCharset "UTF-8"
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand "version": project.version, "mod_id": project.mod_id, "neo_version": project.neo_version,
+            "minecraft_version_range": project.minecraft_version_range
+    }
+}

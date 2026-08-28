@@ -10,8 +10,8 @@
 #                                                         why one jar covers 1.21.11 through 26.x)
 #   <platform>-<mc-version>   e.g. "fabric-1.21.1",      -> platforms whose loader ties a build
 #                                  "fabric-26.1",            tightly to one specific MC version's
-#                                  "forge-26.1"               mappings/API need a separate module
-#                                                            PER targeted MC version, each its own
+#                                  "forge-26.1",              mappings/API need a separate module
+#                                  "neoforge-1.21.11"         PER targeted MC version, each its own
 #                                                            complete build, each producing its own
 #                                                            jar filed under its own MC-version
 #                                                            subfolder. Add a new module directory
@@ -103,7 +103,7 @@ shopt -s nullglob
 for module_dir in "$ROOT_DIR"/*/; do
   module_dir="${module_dir%/}"
   name="$(basename "$module_dir")"
-  [[ "$name" =~ ^(paper|fabric|forge)(-[0-9].*)?$ ]] || continue
+  [[ "$name" =~ ^(paper|fabric|forge|neoforge)(-[0-9].*)?$ ]] || continue
   build_module "$module_dir"
 done
 

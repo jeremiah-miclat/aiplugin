@@ -1,0 +1,23 @@
+license="MIT"
+
+[[mods]]
+modId="${mod_id}"
+version="${version}"
+displayName="AI Companion"
+description='''
+In-game AI chat companion (join greetings, "!ai" Q&A, item gives) - OpenRouter, OpenAI-compatible, or Anthropic.
+'''
+
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="[${neo_version},)"
+    ordering="NONE"
+    side="SERVER"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="SERVER"
