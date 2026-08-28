@@ -1,8 +1,8 @@
 # AI Companion — multi-platform plan
 
 Port of `ai-bot-openrouter/watcher.js` (a Node.js sidecar that tailed the PaperMC log and used
-RCON) into native server plugins/mods. Build order: **Paper** (done) → **Fabric** (1.21.11 done,
-26.1 blocked — see below) → **Forge** (1.21.11 done) → NeoForge (not started).
+RCON) into native server plugins/mods. Build order: **Paper** (done) → **Fabric** (1.21.11, 26.1
+done) → **Forge** (1.21.11, 26.1, 26.2 all done) → NeoForge (not started).
 
 **Server-agnostic by design:** the original `watcher.js` shipped with one specific server's
 lore/rules baked into its KB file. Nothing here is patterned to any particular server — every bit
@@ -146,39 +146,61 @@ integer op-levels (0–4) with a named `PermissionLevel` enum** (`ALL`/`MODERATO
 `ADMINS`/`OWNERS`) — `CommandManager.requirePermissionLevel(CommandManager.ADMINS_CHECK)` is the
 modern equivalent of the old `.requires(source -> source.hasPermissionLevel(4))`.
 
-## fabric-26.1/ — source complete, build currently blocked upstream
+## fabric-26.1/ — done, builds clean
 
-The Java source is fully written and extensively cross-checked (via `javap` against real,
-correctly-mapped Minecraft classes) — but it can't actually compile right now because **Mojang is
-not currently publishing official mapping data for the 26.x version line** (confirmed directly
-against `piston-meta.mojang.com`'s live version manifest: every 26.1.x patch and 26.2 have a
-`downloads` block with only `client`/`server`, no `client_mappings`/`server_mappings` — unlike
-1.21.11, which has both). Fabric's own Yarn mappings are built *from* Mojang's official mappings,
-which is also why no Yarn build exists for this line either (see `fabric-26.1/gradle.properties`).
+Was blocked, now fixed — the real root cause turned out to have nothing to do with Mojang's
+mapping data being unavailable (that theory, recorded below for the record, was wrong).
+**Minecraft ships genuinely unobfuscated as of 26.1** (confirmed against Fabric's own
+announcement, https://fabricmc.net/2026/03/14/261.html, and against
+`FabricMC/fabric-example-mod`'s `26.1.2` branch), so there's no mapping step at all for this
+version line — and Fabric ships a **separate Gradle plugin id** for that, `net.fabricmc.fabric-loom`,
+not a new capability on the old `fabric-loom` id. This module's `build.gradle` was requesting
+newer/SNAPSHOT *versions* of the old plugin id, which could never work regardless of version since
+that plugin's mapping-resolution code always expects Mojang's `client_mappings`/`server_mappings`
+manifest fields to exist (confirmed directly: even the newest `1.18.0-alpha.19` build of the old
+`fabric-loom` id still throws `Failed to find official mojang mappings for 26.1.2`). Switching the
+plugin id fixed it outright — first build under the new id got all the way to a real, single
+compile error (`PlayerChatMessage.getContent()` doesn't exist any more — `signedContent()` does)
+rather than failing at configuration time.
 
-This looks like it may be temporary, not a permanent policy change: a separate project on this
-machine has a genuinely successful build from **August 23rd** with correctly-mapped classes
-cached, and Mojang's own manifest for 26.1.2 shows a `time` of **August 25th** — meaning mappings
-were very likely available up to right around when Mojang last regenerated that version's
-manifest, and the regen is probably what dropped them. Worth periodically retrying rather than
-treating this as permanently stuck:
+Practical notes if you touch this module:
+- No `mappings` line in `build.gradle` at all — nothing to configure.
+- Dependencies that used to need `modImplementation` (fabric-loader, fabric-api) now just use
+  plain `implementation`, since there's no remap step distinguishing "mod" dependencies from
+  ordinary ones. `include(implementation(...))` for jar-in-jar (common/snakeyaml) is unchanged.
+- Needs `org.gradle.configuration-cache=false` in `gradle.properties` — this Loom version isn't
+  compatible with Gradle's configuration cache yet (per `FabricMC/fabric-loom#1349`).
+- **The Gradle daemon process itself must run on Java 25**, not just the compile toolchain — this
+  is a real, separate requirement from Forge's 26.x modules (which don't need this: ForgeGradle
+  provisions Java 25 internally just for Minecraft processing, without needing the outer daemon on
+  25). Fixed here via `./gradlew updateDaemonJvm --jvm-version=25`, which writes
+  `gradle/gradle-daemon-jvm.properties` — the wrapper then self-selects/auto-downloads a Java 25
+  JDK via the `foojay-resolver-convention` plugin already in `settings.gradle`, with no `JAVA_HOME`
+  override needed on the machine running `release.sh`.
 
-```
-cd fabric-26.1
-JAVA_HOME=<path to a Java 25 JDK> gradle --no-daemon build
-```
+Different mapping set from Yarn, real naming differences worth knowing about: Mojang's own names
+use `ServerPlayer`/`MinecraftServer` (not Yarn's `ServerPlayerEntity`),
+`net.minecraft.resources.Identifier` (not `ResourceLocation`), `BuiltInRegistries`/
+`Registry.getOptional(...)`, `Component`/`ChatFormatting`, and the same op-level-to-`PermissionLevel`
+change as 1.21.11 but with different names: `Commands.hasPermission(Commands.LEVEL_ADMINS)` — all
+confirmed identical to what `forge-1.21.11/`, `forge-26.1/`, and `forge-26.2/` already document,
+since they're the same official Mojang mapping data Forge uses directly.
 
-(needs a system/portable Gradle since this module has no wrapper yet — generating one requires
-the project to configure successfully first, which is exactly what's currently blocked). Once it
-builds, run `gradle wrapper --gradle-version 9.7.1` inside it so `release.sh` picks it up
-automatically like `fabric-1.21.11`.
+<details>
+<summary>For the record: what the blocker looked like before it was understood (kept so a future
+mis-diagnosis doesn't repeat this detour)</summary>
 
-Different mapping set, real naming differences worth knowing about if you pick this back up:
-Mojang mappings use `ServerPlayer`/`MinecraftServer` (not Yarn's `ServerPlayerEntity`),
-`net.minecraft.resources.Identifier` (not `ResourceLocation` — genuinely renamed in this version),
-`BuiltInRegistries`/`Registry.getOptional(...)`, `Component`/`ChatFormatting`, and the same
-op-level-to-`PermissionLevel` change as 1.21.11 but with different names:
-`Commands.hasPermission(Commands.LEVEL_ADMINS)`.
+It looked, from the outside, exactly like missing mapping data: `piston-meta.mojang.com`'s live
+version manifest for every 26.1.x patch and 26.2 has a `downloads` block with only
+`client`/`server`, no `client_mappings`/`server_mappings` (unlike 1.21.11, which has both), and the
+old `fabric-loom` plugin id's error message — `Failed to find official mojang mappings for
+26.1.2` — reads exactly like "the data isn't there yet." Both of those observations are still
+literally true; they just don't mean what they first appeared to mean. The actual reason those
+manifest fields are empty is that there's nothing to map — Mojang stopped obfuscating the
+client/server jars for this version line, so a mapping file would be a no-op. Forge's own tooling
+handles that gracefully (its build log shows a `srg2names[...][Empty]` step and just proceeds); the
+old Fabric Loom plugin id's mapping-resolution code doesn't have that fallback and just throws.
+</details>
 
 ## forge-1.21.11/ — done, builds clean
 
@@ -221,3 +243,37 @@ official-mapped Forge 1.21.11-61.2.0 classes via `javap`, not assumed):
 - `com.mojang.authlib.GameProfile` is a record now — `.name()`, not `.getName()`.
 - `Player.drop(ItemStack, boolean)` is two-arg here (not three, unlike the `fabric-26.1/` draft's
   assumption for a later MC version) — mirrors vanilla's `GiveCommand` drop-what-doesn't-fit path.
+
+## forge-26.1/ and forge-26.2/ — done, build clean
+
+Same source as `forge-1.21.11/` — `AiCompanionMod.java`/`ForgeGameBridge.java` are byte-for-byte
+copies, and both modules compiled against their respective Minecraft/Forge jars with **zero source
+changes needed**. That's a real, compiler-verified result (not an assumption carried over): the
+whole point of building these two out was to check whether the API surface documented above for
+1.21.11 actually holds across the 26.x line, and it does, down to `Identifier`,
+`GameProfile.name()`, `Player.drop(ItemStack, boolean)`, and the per-event-type `EventBus` model,
+all unchanged.
+
+What *does* differ, purely in build configuration:
+- **Java 25**, not 21 — Mojang ships Java 25 to end users in 26.1+ (this is stated directly in
+  Forge's own MDK `build.gradle` comment for this line, not guessed).
+- `forge-26.1/` targets the **latest 26.1.x patch** (`26.1.2-64.1.0` as of scaffolding), the same
+  way `forge-1.21.11/` targets 1.21.11's latest patch rather than every `-rc`/`-pre` along the way —
+  update `gradle.properties` as new 26.1.x patches land rather than adding yet another module per
+  dot-release.
+- `forge-26.2/` is genuinely a separate Forge build line (`65.x`, vs. `64.x` for 26.1.2), so it gets
+  its own module rather than being folded into `forge-26.1/`.
+- `mods.toml`'s `minecraft` dependency range is `[26.1,26.2)` / `[26.2,26.3)` respectively, and
+  `loaderVersion`/`forge` dependency ranges are `[64,)` / `[65,)` — these two jars will refuse to
+  load on each other's Minecraft version even though the code is identical, which is correct: see
+  the note on `srg2names[...][Empty]` below for why "identical code" doesn't imply "one jar could
+  serve both" the way Paper's does across versions.
+
+Building these two modules is what turned up the real explanation for `fabric-26.1/`'s blocker
+(see that section above, now fixed): Mojang's `piston-meta.mojang.com` manifest for 26.2 has no
+`client_mappings`/`server_mappings` entries not because that data is missing/delayed, but because
+the 26.x client/server jars ship unobfuscated — there's nothing to map. Forge's build log for these
+two modules shows that directly: a `srg2names[official-26.2][Empty]` step with no separate
+mapping-file download at all, and it just proceeds. That's also exactly why `fabric-26.1/` needed a
+different Fabric Loom *plugin id* (`net.fabricmc.fabric-loom`, not a newer version of the old
+`fabric-loom`) rather than any change on the Forge side — see that section for the fix.

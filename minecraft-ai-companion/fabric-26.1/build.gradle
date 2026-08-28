@@ -1,10 +1,12 @@
 plugins {
-    // SNAPSHOT, not a pinned release: 26.1.2's official-mappings support needs a newer Loom than
-    // any stable release has shipped as of this module's scaffolding - confirmed against a
-    // working reference project on this same machine that resolves fine on 1.17-SNAPSHOT but
-    // fails on 1.17.20 with "Failed to find official mojang mappings for 26.1.2". Revisit this
-    // once Loom cuts a stable release that includes whatever unblocked that.
-    id 'fabric-loom' version '1.17-SNAPSHOT'
+    // NOT the old "fabric-loom" plugin id - Minecraft ships unobfuscated as of 26.1, so Fabric
+    // publishes this as a genuinely separate plugin (no remapping step at all, hence no mappings
+    // block below) rather than a new capability bolted onto the old remapping-based plugin.
+    // Confirmed against FabricMC/fabric-example-mod's own "26.1.2" branch build.gradle - this
+    // project's earlier build.gradle kept the old "fabric-loom" id (just tried bumping its
+    // version), which is why it kept failing with "Failed to find official mojang mappings for
+    // 26.1.2" regardless of which 1.17.x/1.18.0-alpha.x version was requested.
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
 }
 
 version = project.mod_version
@@ -21,11 +23,9 @@ repositories {
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    // No Yarn mappings exist for this game version - see gradle.properties. Loom's built-in
-    // official-mappings support is the only option here.
-    mappings loom.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    // No mappings block: Minecraft ships already-deobfuscated for 26.1+, so there's nothing to map.
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     include(implementation("com.riftforged:ai-companion-common:1.0.0"))
     // Minecraft itself already bundles Gson on the runtime classpath - compile-only, not included.

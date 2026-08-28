@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[64,)"
+license="MIT"
+
+[[mods]]
+modId="aicompanion"
+version="${version}"
+displayName="AI Companion"
+authors="AiCompanion"
+description='''In-game AI chat companion (join greetings, "!ai" Q&A, item gives) - OpenRouter, OpenAI-compatible, or Anthropic.'''
+
+[[dependencies.aicompanion]]
+    modId="forge"
+    mandatory=true
+    versionRange="[64,)"
+    ordering="NONE"
+    side="SERVER"
+
+[[dependencies.aicompanion]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[26.1,26.2)"
+    ordering="NONE"
+    side="SERVER"

@@ -1,0 +1,89 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle' version '[7.0.17,8)'
+    id 'com.gradleup.shadow' version '9.6.1'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+// Mojang ships Java 25 to end users in 26.1+ (see Forge's own MDK build.gradle for this line).
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+minecraft {
+    mappings channel: 'official', version: project.minecraft_version
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+    // ai-companion-common is installed here via `mvn install` in ../common (see README.md).
+    mavenLocal()
+}
+
+// A dedicated configuration for the handful of non-mod libraries that need to physically end up
+// inside the final jar (Forge's own "Jar-in-Jar" mechanism is meant for mod-to-mod dependencies
+// with version ranges, not plain libraries) - kept separate from `implementation` so shadowJar
+// only bundles these two, not the entire runtime classpath (which would otherwise mean shading
+// all of Minecraft/Forge itself into the mod jar).
+configurations {
+    shade {
+        // ai-companion-common depends on Gson (compile scope) to build against, but Minecraft
+        // itself already bundles Gson on the runtime classpath - excluded here the same way the
+        // Fabric modules keep it compileOnly, to avoid a duplicate/conflicting copy at runtime.
+        exclude group: 'com.google.code.gson', module: 'gson'
+    }
+    implementation.extendsFrom(shade)
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${project.forge_version}")
+    annotationProcessor "net.minecraftforge:eventbus-validator:${project.eventbus_version}"
+
+    shade "com.riftforged:ai-companion-common:1.0.0"
+    // Not bundled with Minecraft, unlike Gson below - has to be shaded in for config.yml parsing.
+    shade "org.yaml:snakeyaml:2.2"
+    // Minecraft itself already bundles Gson on the runtime classpath, so it's compile-only here -
+    // NOT shaded, to avoid a duplicate/conflicting copy at runtime.
+    compileOnly "com.google.code.gson:gson:2.11.0"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+}
+
+java {
+    withSourcesJar()
+}
+
+processResources {
+    // Config-cache-safe: `expand`'s closure runs at task-execution time, where referencing the
+    // live `project` object (rather than a plain captured value) is disallowed under Gradle 9's
+    // configuration cache (org.gradle.configuration-cache=true, set in gradle.properties).
+    def modVersion = project.version.toString()
+    inputs.property "version", modVersion
+    filteringCharset "UTF-8"
+    filesMatching("META-INF/mods.toml") {
+        expand "version": modVersion
+    }
+}
+
+// The plain `jar` task's thin output would only ever confuse release.sh's jar-discovery glob
+// (see ../release.sh) once shadowJar starts producing the real, dependency-bundled artifact under
+// the same classifier-less name - so it's disabled outright rather than left around unused.
+jar.enabled = false
+
+shadowJar {
+    archiveClassifier.set('')
+    configurations = [project.configurations.shade]
+}
+
+tasks.named('assemble').configure {
+    dependsOn 'shadowJar'
+}

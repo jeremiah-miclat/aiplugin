@@ -1,4 +1,4 @@
-package com.riftforged.aicompanion.fabric;
+package com.riftforged.aicompanion.forge;
 
 import com.riftforged.aicompanion.AskProcessor;
 import com.riftforged.aicompanion.DiscordWebhook;
@@ -10,15 +10,17 @@ import com.riftforged.aicompanion.state.AskQueue;
 import com.riftforged.aicompanion.state.ConversationMemory;
 import com.riftforged.aicompanion.state.RateLimiter;
 import com.riftforged.aicompanion.state.StateStore;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,15 +36,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Entry point — same structure as the fabric-1.21.11 module's AiCompanionMod (see its Javadoc for
- * the rationale on the batch window not being tick-tied); the two modules read identically at
- * this level since Fabric API's own event/interface names don't change between mapping sets, only
- * the vanilla Minecraft types flowing through their callbacks do (ServerPlayer vs
- * ServerPlayerEntity, Component vs Text, etc. — see FabricGameBridge for those).
+ * Entry point — Forge equivalent of AiCompanionPlugin/the Fabric modules' AiCompanionMod. Same
+ * top-level wiring (state load/save, the clock-aligned batch-window scheduler, resuming pending
+ * asks) on its own dedicated ScheduledExecutorService rather than any tick/event loop: none of
+ * AskProcessor's own logic touches world/player state directly (only via ForgeGameBridge, which
+ * self-dispatches back onto the main thread via server.execute(...)), so there's no need to tie
+ * scheduling to the server tick.
+ *
+ * Forge's event model differs from Fabric API's: every event type here (ServerStartedEvent,
+ * ServerStoppingEvent, PlayerEvent.PlayerLoggedInEvent, ServerChatEvent, RegisterCommandsEvent) is
+ * a global, per-event-type static EventBus — "BUS.addListener(...)" — rather than Fabric's
+ * per-callback-interface registration, and doesn't need a mod-scoped BusGroup the way mod-lifecycle
+ * events (FMLCommonSetupEvent, etc.) do.
  */
-public final class AiCompanionMod implements ModInitializer {
+@Mod(AiCompanionMod.MODID)
+public final class AiCompanionMod {
+    public static final String MODID = "aicompanion";
     private static final Logger LOGGER = Logger.getLogger("AiCompanion");
-    private static final Path CONFIG_DIR = FabricLoader.getInstance().getConfigDir().resolve("aicompanion");
+    private static final Path CONFIG_DIR = FMLPaths.CONFIGDIR.get().resolve("aicompanion");
 
     private YamlBotConfig config;
     private AskQueue askQueue;
@@ -51,7 +62,7 @@ public final class AiCompanionMod implements ModInitializer {
     private StateStore stateStore;
     private AiClient aiClient;
     private AskProcessor askProcessor;
-    private FabricGameBridge bridge;
+    private ForgeGameBridge bridge;
     private Messages messages;
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -62,14 +73,13 @@ public final class AiCompanionMod implements ModInitializer {
     private ScheduledFuture<?> windowTask;
     private MinecraftServer server;
 
-    @Override
-    public void onInitialize() {
+    public AiCompanionMod(FMLJavaModLoadingContext context) {
         this.askQueue = new AskQueue();
         this.rateLimiter = new RateLimiter();
         this.memory = new ConversationMemory();
 
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            this.server = server;
+        ServerStartedEvent.BUS.addListener(event -> {
+            this.server = event.getServer();
             this.stateStore = new StateStore(CONFIG_DIR.resolve("state.json"), LOGGER);
 
             StateStore.Data saved = stateStore.load();
@@ -84,47 +94,48 @@ public final class AiCompanionMod implements ModInitializer {
             }
         });
 
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+        ServerStoppingEvent.BUS.addListener(event -> {
             if (windowTask != null) windowTask.cancel(false);
             scheduler.shutdownNow();
             if (aiClient != null) aiClient.shutdown();
             persistState();
         });
 
-        ServerPlayerEvents.JOIN.register(player ->
-            askProcessor.handleJoin(player.getName().getString()));
+        PlayerEvent.PlayerLoggedInEvent.BUS.addListener(event ->
+            askProcessor.handleJoin(event.getEntity().getGameProfile().name()));
 
-        ServerMessageEvents.ALLOW_CHAT_MESSAGE.register((message, sender, params) -> {
-            String text = message.signedContent().trim();
+        // Predicate<ServerChatEvent> — returning true CANCELS the event (suppresses the message),
+        // the inverse of Fabric's ALLOW_CHAT_MESSAGE (which returns true to ALLOW it through).
+        ServerChatEvent.BUS.addListener(event -> {
+            String text = event.getRawText().trim();
             String prefix = config.askPrefix();
-            if (!text.regionMatches(true, 0, prefix, 0, prefix.length())) return true;
+            if (!text.regionMatches(true, 0, prefix, 0, prefix.length())) return false;
             String question = text.substring(prefix.length()).trim();
-            if (question.isEmpty()) return true;
+            if (question.isEmpty()) return false;
 
-            String player = sender.getName().getString();
+            String player = event.getUsername();
             AskQueue.EnqueueResult result = askQueue.enqueue(player, question, config.maxAsksPerWindow(), config.askCooldownMs());
             return switch (result) {
-                case ACCEPTED -> true;
+                case ACCEPTED -> false;
                 case DUPLICATE, COOLDOWN -> {
                     if (askQueue.shouldNotifyRejection(player)) {
                         bridge.sendPrivate(player, messages.cooldownNotice(config.askCooldownMs() / 1000));
                     }
-                    yield false;
+                    yield true;
                 }
                 case FULL -> {
                     if (askQueue.shouldNotifyRejection(player)) {
                         bridge.sendPrivate(player, messages.queueFullNotice());
                     }
-                    yield false;
+                    yield true;
                 }
             };
         });
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
-            dispatcher.register(Commands.literal("aicompanion")
-                // Mojang's mapped equivalent of Yarn's CommandManager.requirePermissionLevel(
-                // CommandManager.ADMINS_CHECK) - same underlying permission-level overhaul,
-                // different method/constant names between the two mapping sets.
+        RegisterCommandsEvent.BUS.addListener(event ->
+            event.getDispatcher().register(Commands.literal("aicompanion")
+                // 1.21.11 replaced integer op-levels with a named PermissionCheck; LEVEL_ADMINS is
+                // the modern equivalent of the old "requires op level 4".
                 .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
                 .then(Commands.literal("reload").executes(ctx -> {
                     try {
@@ -157,7 +168,7 @@ public final class AiCompanionMod implements ModInitializer {
         }
 
         DiscordWebhook discordWebhook = new DiscordWebhook(config.discordWebhookUrl(), config.discordUsername(), LOGGER);
-        this.bridge = new FabricGameBridge(() -> server, LOGGER, discordWebhook, config.botName());
+        this.bridge = new ForgeGameBridge(() -> server, LOGGER, discordWebhook, config.botName());
 
         this.messages = new Messages(config.personality(), config);
         KnowledgeBase kb = new KnowledgeBase(CONFIG_DIR.resolve("kb"), CONFIG_DIR.resolve("server-info.md"));
