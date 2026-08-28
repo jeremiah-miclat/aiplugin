@@ -40,7 +40,9 @@ public final class AskParser {
 
         List<AskSubpart> out = new ArrayList<>();
         for (int i = 0; i < Math.min(arr.size(), maxSubparts); i++) {
-            out.add(toSubpart(arr.get(i)));
+            AskSubpart subpart = toSubpart(arr.get(i));
+            if (subpart.reply() == null || subpart.reply().isEmpty()) return null;
+            out.add(subpart);
         }
         return out;
     }
@@ -66,7 +68,9 @@ public final class AskParser {
             JsonArray itemArr = item.getAsJsonArray();
             List<AskSubpart> subparts = new ArrayList<>();
             for (int i = 0; i < Math.min(itemArr.size(), maxSubparts); i++) {
-                subparts.add(toSubpart(itemArr.get(i)));
+                AskSubpart subpart = toSubpart(itemArr.get(i));
+                if (subpart.reply() == null || subpart.reply().isEmpty()) return null;
+                subparts.add(subpart);
             }
             result.add(subparts);
         }

@@ -157,14 +157,16 @@ public final class AiClient {
         JsonObject body = new JsonObject();
         body.addProperty("model", model);
         body.add("messages", messages);
-        if (provider == AiProvider.OPENAI_COMPATIBLE) {
+        if (provider == AiProvider.OPENAI_COMPATIBLE && !model.contains("compound")) {
             // Reasoning-capable models (Groq's included) can otherwise leak their chain-of-thought
             // into the actual reply content instead of just the final answer, even when the prompt
-            // asks for output-only text — e.g. groq/compound prefixing a reply with a "**Reasoning**"
-            // section. "hidden" is Groq's own documented value for suppressing that from the content
-            // field entirely. Scoped to OPENAI_COMPATIBLE only (not OPENROUTER/ANTHROPIC, which have
-            // their own reasoning-control conventions) since an unrecognized field risks a strict
-            // provider rejecting the whole request outright rather than just ignoring it.
+            // asks for output-only text — e.g. a reasoning model prefixing a reply with a
+            // "**Reasoning**" section. "hidden" is Groq's own documented value for suppressing that
+            // from the content field entirely. Scoped to OPENAI_COMPATIBLE only (not
+            // OPENROUTER/ANTHROPIC, which have their own reasoning-control conventions) since an
+            // unrecognized field risks a strict provider rejecting the whole request outright rather
+            // than just ignoring it. Groq's compound/compound-mini are agentic systems, not reasoning
+            // models, and reject this field with an HTTP 400 rather than ignoring it.
             body.addProperty("reasoning_format", "hidden");
         }
 
