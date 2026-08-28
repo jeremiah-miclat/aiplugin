@@ -69,7 +69,7 @@ Both are re-read live on every question — no reload needed for these two.
 
 ```yaml
 itemGiving:
-  enabled: true            # master switch — false means the bot NEVER gives an item, no exceptions
+  enabled: false           # master switch (shipped default) — true lets the bot give items when asked
   maxPerDay: 10             # per player, rolling 24h window
   maxQuantity: 64            # ordinary stackable items
   maxEquipmentQuantity: 1    # weapons/armor/tools/etc (vanilla max stack size 1 anyway)

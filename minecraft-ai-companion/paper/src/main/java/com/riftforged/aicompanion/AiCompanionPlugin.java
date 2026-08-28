@@ -1,7 +1,7 @@
 package com.riftforged.aicompanion;
 
 import com.riftforged.aicompanion.ai.AiClient;
-import com.riftforged.aicompanion.commands.ReloadCommand;
+import com.riftforged.aicompanion.commands.AdminCommand;
 import com.riftforged.aicompanion.kb.KnowledgeBase;
 import com.riftforged.aicompanion.listeners.AskListener;
 import com.riftforged.aicompanion.listeners.JoinListener;
@@ -46,7 +46,7 @@ public final class AiCompanionPlugin extends JavaPlugin {
         rateLimiter.restore(saved.requestLog());
         askQueue.restore(saved.pendingAsks());
 
-        getCommand("aicompanion").setExecutor(new ReloadCommand(this));
+        getCommand("aicompanion").setExecutor(new AdminCommand(this));
 
         reload();
 

@@ -7,10 +7,10 @@ description: In-game AI chat companion (join greetings, "!ai" Q&A, item gives) â
 commands:
   aicompanion:
     description: Manage the AI Companion plugin.
-    usage: /<command> reload
+    usage: /<command> reload|config|get <key>|set <key> <value>|models list|add|remove <id>
     aliases: [aic]
     permission: aicompanion.reload
 permissions:
   aicompanion.reload:
-    description: Reload the AI Companion plugin's config.yml, server-info.md, and kb/ files.
+    description: Reload, view, and edit the AI Companion plugin's config.yml (server-info.md and kb/ reload too, but aren't editable via command).
     default: op

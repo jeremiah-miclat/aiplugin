@@ -7,7 +7,12 @@ C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\r
 C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\riftforged\aicompanion\AskProcessor.java
 C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\riftforged\aicompanion\BotConfig.java
 C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\riftforged\aicompanion\ChatBroadcaster.java
-C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\riftforged\aicompanion\commands\ReloadCommand.java
+C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\riftforged\aicompanion\commands\AdminCommand.java
+C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\riftforged\aicompanion\config\AdminConfigCommands.java
+C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\riftforged\aicompanion\config\ConfigEditException.java
+C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\riftforged\aicompanion\config\ConfigField.java
+C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\riftforged\aicompanion\config\ConfigFieldRegistry.java
+C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\riftforged\aicompanion\config\ConfigFileEditor.java
 C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\riftforged\aicompanion\DiscordWebhook.java
 C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\riftforged\aicompanion\ItemGiver.java
 C:\Users\jejom\Desktop\aiplugin\minecraft-ai-companion\paper\src\main\java\com\riftforged\aicompanion\kb\KbChunk.java

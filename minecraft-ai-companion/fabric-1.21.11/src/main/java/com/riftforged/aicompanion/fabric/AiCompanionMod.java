@@ -1,11 +1,17 @@
 package com.riftforged.aicompanion.fabric;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.riftforged.aicompanion.AskProcessor;
 import com.riftforged.aicompanion.DiscordWebhook;
 import com.riftforged.aicompanion.Messages;
 import com.riftforged.aicompanion.Persona;
 import com.riftforged.aicompanion.YamlBotConfig;
 import com.riftforged.aicompanion.ai.AiClient;
+import com.riftforged.aicompanion.config.AdminConfigCommands;
+import com.riftforged.aicompanion.config.ConfigEditException;
+import com.riftforged.aicompanion.config.ConfigFileEditor;
 import com.riftforged.aicompanion.kb.KnowledgeBase;
 import com.riftforged.aicompanion.state.AskQueue;
 import com.riftforged.aicompanion.state.ConversationMemory;
@@ -27,6 +33,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -137,7 +144,84 @@ public final class AiCompanionMod implements ModInitializer {
                         ctx.getSource().sendError(Text.literal("[AiCompanion] Reload failed — check the server console for details."));
                     }
                     return 1;
-                }))));
+                }))
+                .then(CommandManager.literal("config").executes(ctx -> {
+                    for (String line : AdminConfigCommands.listLines(configFile())) {
+                        ctx.getSource().sendFeedback(() -> Text.literal("[AiCompanion] " + line), false);
+                    }
+                    return 1;
+                }))
+                .then(CommandManager.literal("get")
+                    .then(CommandManager.argument("key", StringArgumentType.word())
+                        .suggests((ctx, builder) -> suggestKeys(builder))
+                        .executes(ctx -> {
+                            try {
+                                String line = AdminConfigCommands.get(configFile(), StringArgumentType.getString(ctx, "key"));
+                                ctx.getSource().sendFeedback(() -> Text.literal("[AiCompanion] " + line), false);
+                            } catch (ConfigEditException e) {
+                                ctx.getSource().sendError(Text.literal("[AiCompanion] " + e.getMessage()));
+                            }
+                            return 1;
+                        })))
+                .then(CommandManager.literal("set")
+                    .then(CommandManager.argument("key", StringArgumentType.word())
+                        .suggests((ctx, builder) -> suggestKeys(builder))
+                        .then(CommandManager.argument("value", StringArgumentType.greedyString())
+                            .executes(ctx -> {
+                                String key = StringArgumentType.getString(ctx, "key");
+                                String value = StringArgumentType.getString(ctx, "value");
+                                try {
+                                    String result = AdminConfigCommands.set(configFile(), key, value);
+                                    reload();
+                                    ctx.getSource().sendFeedback(() -> Text.literal("[AiCompanion] " + result), false);
+                                } catch (ConfigEditException e) {
+                                    ctx.getSource().sendError(Text.literal("[AiCompanion] " + e.getMessage()));
+                                }
+                                return 1;
+                            }))))
+                .then(CommandManager.literal("models")
+                    .then(CommandManager.literal("list").executes(ctx -> {
+                        ctx.getSource().sendFeedback(() -> Text.literal(
+                            "[AiCompanion] ai.models: " + String.join(", ", ConfigFileEditor.getModels(configFile()))), false);
+                        return 1;
+                    }))
+                    .then(CommandManager.literal("add")
+                        .then(CommandManager.argument("id", StringArgumentType.string())
+                            .executes(ctx -> {
+                                String id = StringArgumentType.getString(ctx, "id");
+                                try {
+                                    ConfigFileEditor.addModel(configFile(), id);
+                                    reload();
+                                    ctx.getSource().sendFeedback(() -> Text.literal("[AiCompanion] Added model: " + id), false);
+                                } catch (ConfigEditException e) {
+                                    ctx.getSource().sendError(Text.literal("[AiCompanion] " + e.getMessage()));
+                                }
+                                return 1;
+                            })))
+                    .then(CommandManager.literal("remove")
+                        .then(CommandManager.argument("id", StringArgumentType.string())
+                            .executes(ctx -> {
+                                String id = StringArgumentType.getString(ctx, "id");
+                                try {
+                                    ConfigFileEditor.removeModel(configFile(), id);
+                                    reload();
+                                    ctx.getSource().sendFeedback(() -> Text.literal("[AiCompanion] Removed model: " + id), false);
+                                } catch (ConfigEditException e) {
+                                    ctx.getSource().sendError(Text.literal("[AiCompanion] " + e.getMessage()));
+                                }
+                                return 1;
+                            }))))));
+    }
+
+    private static Path configFile() {
+        return CONFIG_DIR.resolve("config.yml");
+    }
+
+    private static CompletableFuture<Suggestions> suggestKeys(SuggestionsBuilder builder) {
+        for (String key : AdminConfigCommands.suggestKeys(builder.getRemaining())) {
+            builder.suggest(key);
+        }
+        return builder.buildFuture();
     }
 
     /** (Re)builds everything derived from config.yml/server-info.md/kb/ — used by both server

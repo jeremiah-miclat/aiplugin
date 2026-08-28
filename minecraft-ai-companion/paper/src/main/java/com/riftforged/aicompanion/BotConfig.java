@@ -45,7 +45,7 @@ public final class BotConfig {
         int cooldownSeconds = cfg.getInt("askCooldownSeconds", -1);
         this.askCooldownMs = cooldownSeconds >= 0 ? cooldownSeconds * 1000L : this.batchWindowMs;
         this.maxAskSubparts = Math.max(1, cfg.getInt("maxAskSubparts", 1));
-        this.itemGivingEnabled = cfg.getBoolean("itemGiving.enabled", true);
+        this.itemGivingEnabled = cfg.getBoolean("itemGiving.enabled", false);
         this.itemGivingMaxPerDay = cfg.getInt("itemGiving.maxPerDay", 10);
         this.itemGivingMaxQuantity = cfg.getInt("itemGiving.maxQuantity", 64);
         this.itemGivingMaxEquipmentQuantity = cfg.getInt("itemGiving.maxEquipmentQuantity", 1);

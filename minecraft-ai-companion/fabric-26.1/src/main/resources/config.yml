@@ -50,7 +50,7 @@ itemGiving:
   # Master switch. If false, the bot will NEVER give out an item — no matter what a player asks
   # for or what the AI would otherwise decide — and it's told in its own prompt not to offer.
   # Plain questions/chat are completely unaffected either way.
-  enabled: true
+  enabled: false
 
   # How many item-give requests one player can have fulfilled per rolling 24h window. Plain
   # questions/chitchat are NOT limited by this — only actually receiving an item spends a slot.

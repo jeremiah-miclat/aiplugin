@@ -72,6 +72,15 @@ conversation history all survive a reload — only config.yml/server-info.md/kb/
 Needs op-equivalent permission: on Paper that's the `aicompanion.reload` permission (default op,
 alias `/aic`); on Fabric it's vanilla's permission level 4 (the same level `/op` grants).
 
+**Most of config.yml can be changed from in-game chat instead of hand-editing the file** —
+`/aicompanion config` lists every editable key and its current value, `/aicompanion get <key>` and
+`/aicompanion set <key> <value>` view/change one (e.g. `/aicompanion set chatStyle.nameColor red`,
+`/aicompanion set personality trashtalk`), and `/aicompanion models list|add|remove <id>` manages
+the `ai.models` list — each `set`/`add`/`remove` reloads automatically, no separate `/aicompanion
+reload` needed. `ai.apiKey` is the one exception: it's never viewable or settable via command (a
+secret shouldn't be echoed into chat/server logs), so that field alone still needs a direct edit to
+config.yml followed by `/aicompanion reload`.
+
 ## 3. Describe your own server
 
 Nothing in this plugin is pre-loaded with any particular server's content — every default ships
@@ -91,7 +100,7 @@ Both are re-read live on every question — no reload needed for these two speci
 
 ```yaml
 itemGiving:
-  enabled: true        # master switch — false means the bot NEVER gives an item, no exceptions
+  enabled: false       # master switch (shipped default) — true lets the bot give items when asked
   maxPerDay: 10         # per player, rolling 24h window
   maxQuantity: 64        # ordinary stackable items
   maxEquipmentQuantity: 1 # weapons/armor/tools/etc (vanilla max stack size 1 anyway)
